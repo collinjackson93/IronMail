@@ -8,12 +8,3 @@ Application for sending encrypted emails
 
 ## Weekly Meeting Time
 Tuesdays, 11:45 AM
-
-## Todo
-add prioritized user stories
-
-create dev guidelines
-- branches
-- code style
-- test requirements
-- etc
