@@ -6,6 +6,9 @@ Application for sending encrypted emails
 - If you develop a feature, make sure there is ample test coverage for it before moving onto a new feature. Ideally, tests would be created prior to merging into master, but it is not a necessity.
 - Use good naming conventions and break complex functions down into smaller functions that are easier to test.
 
+## Weekly Meeting Time
+Tuesdays, 11:45 AM
+
 ## Todo
 add prioritized user stories
 
