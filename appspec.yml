@@ -22,7 +22,7 @@ os: linux
 #   "files" section altogether. A blank or incomplete "files" section
 #   may cause associated deployments to fail.
 files:
-  - source: /server
+  - source: server
     destination: /tmp
 # For deployments to Amazon Linux, Ubuntu Server, or RHEL instances,
 #   you can specify a "permissions"
@@ -76,10 +76,10 @@ hooks:
 # During the ApplicationStop deployment lifecycle event, run the commands
 #   in the script specified in "location" starting from the root of the
 #   revision's file bundle.
-  # ApplicationStop:
-  #   - location:
-  #     timeout:
-  #     runas:
+  ApplicationStop:
+    - location: server/scripts/stop.sh
+      timeout: 10
+      runas: ec2-user
   #   - location:
   #     timeout:
   #     runas:
@@ -95,14 +95,14 @@ hooks:
 # During the AfterInstall deployment lifecycle event, run the commands
 #   in the script specified in "location".
   AfterInstall:
-    - location: scripts/build.sh
-      timeout: 10
+    - location: server/scripts/build.sh
+      timeout: 30
       runas: ec2-user
 # During the ApplicationInstall deployment lifecycle event, run the commands
 #   in the script specified in "location".
   ApplicationStart:
-    - location: scripts/start.sh
-      timeout: 10
+    - location: server/scripts/start.sh
+      timeout: 30
       runas: ec2-user
 # During the ValidateService deployment lifecycle event, run the commands
 #   in the script specified in "location".
