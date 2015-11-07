@@ -1,0 +1,8 @@
+ironmailserver:
+  build: ./
+  ports:
+    - "8080:3000"
+  links:
+    - mongo
+mongo:
+  image: mongo

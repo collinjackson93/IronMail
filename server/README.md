@@ -1,7 +1,7 @@
 # Getting Started
 
-* ## Using Docker
-  * `docker run --name some-mongo -d mongo` or `docker restart -d some-mongo`
-  * `docker build -t ironmailserver .`
-  * `docker run -d -p 8080:3000 --link some-mongo:mongo ironmailserver`
-  * navigate to `192.168.99.100:8080` to view the results
+* Install `docker-compose`
+* Run `docker-compose build`
+* Then run `docker-compose up` (you can pass the `-d` flag to run it in the background)
+* Navigate to `[docker IP]:8080` (you can get your docker IP by running `docker-machine ip default`)
+* Every time there is a code change, you must run `docker-compose build` to rebuild the image and make the changes appear
