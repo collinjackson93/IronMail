@@ -23,7 +23,7 @@ os: linux
 #   may cause associated deployments to fail.
 files:
   - source: server
-    destination: /tmp
+    destination: /src/ironmail
 # For deployments to Amazon Linux, Ubuntu Server, or RHEL instances,
 #   you can specify a "permissions"
 #   section here that describes special permissions to apply to the files
