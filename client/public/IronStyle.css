@@ -1,3 +1,35 @@
-h1 {
-    color: red;
+hgroup {
+    color: steelblue;
+    border: groove;
+    align: center;
+    text-align: center;
+    position: relative;
+}
+
+h1{
+    border: groove;
+}
+
+h2{
+    display: inline-flex;
+}
+
+#LogInButtonGroup{
+    float: right;
+    display: inline-flex;
+}
+
+#SignUpButtonGroup{
+    float: left;
+    display: inline-flex;
+}
+
+input{
+    display: block;
+}
+
+body{
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
 }

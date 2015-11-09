@@ -16,8 +16,19 @@ app.get('/', function (req, res) {
 
 app.get('/len', function(req, res) {
   users.find({}, function(err, docs) {
-    res.send(''+docs.length);
+    try {
+      res.send('' + docs.length);
+    }
+    catch(exception){
+      res.send(exception);
+    }
   });
+});
+
+app.get('/insert', function(req, res){
+  users.insert({name: 'World'});
+  res.send("inserted");
+
 });
 
 app.get('/clear', function(req, res) {
