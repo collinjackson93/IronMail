@@ -2,13 +2,16 @@ var express = require('express');
 var app = express();
 var db = require('monk')('mongo:27017/test');
 var users = db.get('users');
+var path = require('path');
+var cors = require('cors');
 
 users.insert({name: 'World'});
 
-app.get('/', function(req, res) {
-  users.findOne({}).on('success', function(doc) {
-    res.send('Hello, ' + doc.name + '!');
-  });
+app.use(express.static(path.join("./../client/", 'public')));
+app.use(cors());
+
+app.get('/', function (req, res) {
+  res.sendFile("IronMail.html", {"root": "./../client"});
 });
 
 app.get('/len', function(req, res) {
@@ -27,4 +30,6 @@ app.get('/clear', function(req, res) {
   });
 });
 
-app.listen(3000);
+var server = app.listen(3000, function () {
+  console.log("Server listening at http://localhost:3000");
+});
