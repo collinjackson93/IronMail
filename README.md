@@ -1,5 +1,6 @@
 # SecureEmailing
 Application for sending encrypted emails
+
 Server is live at 107.170.176.250
 
 ## Development Guidelines
