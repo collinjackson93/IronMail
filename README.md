@@ -1,5 +1,6 @@
 # SecureEmailing
 Application for sending encrypted emails
+Server is live at 107.170.176.250
 
 ## Development Guidelines
 - Code in the master branch must be functional and pass all tests. If a feature can be finished in a commit or two, it can be added directly to the master branch. Otherwise, create a new branch to develop the feature in.
