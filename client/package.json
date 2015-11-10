@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "An encryption mail client-server implementation",
   "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "cors": "^2.7.1",
     "express": "^4.13.3",

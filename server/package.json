@@ -1,17 +1,13 @@
 {
   "name": "IronMailServer",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "forever.js",
   "scripts": {
     "test": "mocha -R nyan test.js",
-    "start": "node forever.js",
-    "freshRun": "npm install && npm start"
+    "start": "node forever.js"
   },
   "dependencies": {
-    "express": "^4.13.3",
-    "monk": "^1.0.1",
-    "cors": "^2.7.1",
-    "d3": "3.5.6"
+    "monk": "^1.0.1"
   },
   "devDependencies": {
     "chai": "^3.4.1",
