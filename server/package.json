@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha -R nyan test.js",
-    "start": "node index.js",
+    "start": "node forever.js",
     "freshRun": "npm install && npm start"
   },
   "dependencies": {

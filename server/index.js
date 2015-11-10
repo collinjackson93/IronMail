@@ -11,7 +11,14 @@ app.use(express.static(path.join("./../client/", 'public')));
 app.use(cors());
 
 app.get('/', function (req, res) {
-  res.sendFile("IronMail.html", {"root": "./../client"});
+  // res.sendFile("IronMail.html", {"root": "./../client"});
+  try {
+    users.findOne({}, function(err, doc) {
+      res.send('Hello ' + doc.name + '!');
+    });
+  } catch (e) {
+    res.send("Something went wrong!");
+  }
 });
 
 app.get('/len', function(req, res) {
@@ -28,7 +35,6 @@ app.get('/len', function(req, res) {
 app.get('/insert', function(req, res){
   users.insert({name: 'World'});
   res.send("inserted");
-
 });
 
 app.get('/clear', function(req, res) {
