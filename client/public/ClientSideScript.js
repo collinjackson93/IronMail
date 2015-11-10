@@ -36,13 +36,15 @@ function logInIronMail(name, passwd) {
     // need to replace url param with proper input
     getPageWithCallback(url, false, function(response){
         if(!response) {
-            var passwordIsCorrect = verifyPassword(passwd, function(verification){
+            // need to ensure this a synchronous call
+            var correctEntry;
+            verifyPassword(passwd, correctEntry, function(verification){
                 //TODO: logic for verifying password with server goes here
+                correctEntry = true;
             });
-            if (passwordIsCorrect) {
+            if (correctEntry) {
                 console.log('success');
             }
-
         }
         else{
             alert('username not found')
