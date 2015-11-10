@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha -R nyan test.js",
     "start": "node index.js",
     "freshRun": "npm install && npm start"
   },
@@ -11,7 +11,12 @@
     "express": "^4.13.3",
     "monk": "^1.0.1",
     "cors": "^2.7.1",
-    "express": "^4.13.3",
     "d3": "3.5.6"
+  },
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "mocha": "^2.3.3",
+    "sinon": "^1.17.2",
+    "sinon-chai": "^2.8.0"
   }
 }
