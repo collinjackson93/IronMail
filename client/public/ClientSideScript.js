@@ -2,6 +2,8 @@
  * Created by Lawrence on 11/6/15.
  */
 
+var server = require(null); //some abstraction of the server that makes client calls fairly uninvolved?
+
 /* AJAX request function that requires response
    CITATION: GOT THIS FROM CODE I WROTE PREVIOUSLY FOR the ORACLEOFOMAHA assignment */
 function getPageWithCallback(url, signingUpFlag, callback) {
@@ -53,3 +55,10 @@ function logInIronMail(name, passwd) {
 
 }
 
+
+
+function sendEmail(){};
+
+function encryptText(){};
+
+function onEmailReceived(){};
