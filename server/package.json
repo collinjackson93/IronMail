@@ -7,7 +7,7 @@
     "start": "node forever.js"
   },
   "dependencies": {
-    "monk": "^1.0.1"
+    "express": "^4.13.3"
   },
   "devDependencies": {
     "chai": "^3.4.1",

@@ -1,6 +1,5 @@
 FROM ubuntu:14.04
 RUN apt-get update
-RUN apt-get -y install nodejs npm libkrb5-dev
 RUN ln -s /usr/bin/nodejs /usr/bin/node
 
 # use changes to package.json to force Docker not to use the cache
