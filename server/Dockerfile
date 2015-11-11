@@ -1,6 +1,7 @@
 FROM ubuntu:14.04
-RUN apt-get update
-RUN apt-get -y install nodejs npm
+RUN apt-get update && apt-get install -y \
+    nodejs \
+    npm
 RUN ln -s /usr/bin/nodejs /usr/bin/node
 
 # use changes to package.json to force Docker not to use the cache

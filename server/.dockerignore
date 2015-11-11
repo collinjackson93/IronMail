@@ -1,0 +1,5 @@
+nginx
+node_modules
+docker-compse.yml
+Dockerfile
+*.md
