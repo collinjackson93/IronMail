@@ -1,8 +1,14 @@
 ironmailserver:
   build: ./
   ports:
-    - "8080:3000"
+    - "3000"
   links:
     - mongo
 mongo:
   image: mongo
+nginx:
+  build: ./nginx
+  ports:
+    - "80:80"
+  links:
+    - ironmailserver:ironmailserver

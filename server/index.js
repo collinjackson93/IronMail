@@ -3,15 +3,10 @@ var app = express();
 var db = require('monk')('mongo:27017/test');
 var users = db.get('users');
 var path = require('path');
-var cors = require('cors');
 
 users.insert({name: 'World'});
 
-app.use(express.static(path.join("./../client/", 'public')));
-app.use(cors());
-
 app.get('/', function (req, res) {
-  // res.sendFile("IronMail.html", {"root": "./../client"});
   try {
     users.findOne({}, function(err, doc) {
       res.send('Hello ' + doc.name + '!');
