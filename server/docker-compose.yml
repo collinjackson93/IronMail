@@ -1,15 +1,16 @@
 ironmailserver:
-  build: ./
-  ports:
-    - "3000"
+  extends:
+    file: common-compose.yml
+    service: ironmailserver
   links:
     - mongo
 mongo:
-  image: mongo
+  extends:
+    file: common-compose.yml
+    service: mongo
 nginx:
-  build: ./nginx
-  ports:
-    - "80:80"
-    - "443:443"
+  extends:
+    file: common-compose.yml
+    service: nginx
   links:
     - ironmailserver:ironmailserver

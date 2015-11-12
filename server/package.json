@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "forever.js",
   "scripts": {
-    "test": "mocha -R nyan test.js",
+    "test": "mocha test.js",
     "start": "node forever.js"
   },
   "dependencies": {

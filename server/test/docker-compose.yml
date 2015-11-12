@@ -1,0 +1,13 @@
+ironmailserver:
+  extends:
+    file: ../common-compose.yml
+    service: ironmailserver
+  links:
+    - mongo
+  command: npm test
+  environment:
+    NODE_ENV: test
+mongo:
+  extends:
+    file: ../common-compose.yml
+    service: mongo

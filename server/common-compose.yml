@@ -1,0 +1,11 @@
+ironmailserver:
+  build: ./
+  ports:
+    - "3000"
+mongo:
+  image: mongo
+nginx:
+  build: ./nginx
+  ports:
+    - "80:80"
+    - "443:443"
