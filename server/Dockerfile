@@ -10,6 +10,8 @@ ADD package.json /tmp/package.json
 RUN cd /tmp && npm install
 RUN mkdir -p /src && cp -a /tmp/node_modules /src/
 
+ENV NODE_ENV production
+
 WORKDIR /src
 ADD . /src
 EXPOSE 3000
