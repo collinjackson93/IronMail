@@ -1,5 +1,5 @@
 ironmailserver:
-  build: ./
+  build: ./node
   ports:
     - "3000"
 mongo:

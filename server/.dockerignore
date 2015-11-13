@@ -1,5 +1,6 @@
 nginx
 node_modules
+test
 docker-compse.yml
 Dockerfile
 *.md
