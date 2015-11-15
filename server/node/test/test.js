@@ -43,8 +43,7 @@ describe('User registration', function() {
     var badEmail = validParams;
     badEmail.email = 'notanEmail';
     users.register(badEmail, function(response) {
-      response.should.contain('ValidationError');
-      response.should.contain('email');
+      response.should.equal("ValidationError: Validator failed for path `email` with value `notanEmail`");
     })
   });
 });
