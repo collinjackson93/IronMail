@@ -12,7 +12,9 @@ app.get('/', function (req, res) {
 app.post('/login', users.login);
 
 app.post('/register', function(req, res) {
-  users.register(req.body, res);
+  users.register(req.body, function(response) {
+    res.send(response);
+  });
 });
 
 var server = app.listen(3000, function () {

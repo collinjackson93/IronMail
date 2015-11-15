@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 
-var dbURI = 'mongodb://mongo:27017/';
+var dbURI = 'mongodb://mongo/';
 
 // Connect to the production or test database
 if (process.env.NODE_ENV === 'test') {

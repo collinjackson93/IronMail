@@ -4,7 +4,7 @@ function login(req, res) {
   res.send('login');
 }
 
-function register(params, res) {
+function register(params, cb) {
   var user = new User({
     username: params.username,
     password: params.password,
@@ -13,9 +13,9 @@ function register(params, res) {
   });
   user.save(function(err) {
     if (err) {
-      res.send(err);
+      cb(err.toString());
     } else {
-      res.send('Successfully registered');
+      cb('Successfully registered');
     }
   })
 }
