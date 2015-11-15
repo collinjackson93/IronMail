@@ -9,11 +9,23 @@ app.get('/', function (req, res) {
   res.send('Testing');
 });
 
-app.post('/login', users.login);
+app.post('/login', function(req, res) {
+  users.login(req.body, function(err, response) {
+    if (err) {
+      res.status(401).send(response);
+    } else {
+      res.send(response);
+    }
+  });
+});
 
 app.post('/register', function(req, res) {
-  users.register(req.body, function(response) {
-    res.send(response);
+  users.register(req.body, function(err, response) {
+    if (err) {
+      res.status(400).send(response);
+    } else {
+      res.send(response);
+    }
   });
 });
 

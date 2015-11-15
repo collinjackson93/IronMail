@@ -4,9 +4,8 @@ var sinonChai = require('sinon-chai');
 var should = chai.should();
 chai.use(sinonChai);
 
-describe('User registration', function() {
+describe('Users', function() {
   var users = require('../routeLogic/users');
-  var validParams;
 
   before(function() {
     // use mocha-mongoose to automatically clear the database after each test
@@ -14,36 +13,88 @@ describe('User registration', function() {
     require('../db/dbConnect');
   });
 
-  beforeEach(function() {
-    // reset validParams in case it got modified in a test
-    validParams = {
+  describe('Registration', function() {
+
+    var validParams = {
       username: 'u1',
       password: 'p1',
       email: 'test@test.com',
       publicKey: 'test'
     };
-  });
-
-  it('should register a new user with valid data', function() {
-    users.register(validParams, function(response) {
-      response.should.equal('Successfully registered');
+    afterEach(function() {
+      // reset validParams in case it got modified in a test
+      validParams = {
+        username: 'u1',
+        password: 'p1',
+        email: 'test@test.com',
+        publicKey: 'test'
+      };
     });
-  });
 
-  it('should ensure that username is unique', function() {
-    users.register(validParams, function(response) {
-      response.should.equal('Successfully registered');
-      users.register(validParams, function(res2) {
-        res2.should.contain('duplicate key error');
+    it('should register a new user with valid data', function() {
+      users.register(validParams, function(err, response) {
+        err.should.be.false;
+        response.should.equal('Successfully registered');
+      });
+    });
+
+    it('should ensure that username is unique', function() {
+      users.register(validParams, function(err, response) {
+        err.should.be.false;
+        response.should.equal('Successfully registered');
+        users.register(validParams, function(err2, res2) {
+          err2.should.be.true;
+          res2.should.contain('duplicate key error');
+        });
+      });
+    });
+
+    it('should not accept an invalid email', function() {
+      var badEmail = validParams;
+      badEmail.email = 'notanEmail';
+      users.register(badEmail, function(err, response) {
+        err.should.be.true;
+        response.should.equal("ValidationError: Validator failed for path `email` with value `notanEmail`");
       });
     });
   });
 
-  it('should not accept an invalid email', function() {
-    var badEmail = validParams;
-    badEmail.email = 'notanEmail';
-    users.register(badEmail, function(response) {
-      response.should.equal("ValidationError: Validator failed for path `email` with value `notanEmail`");
-    })
+  describe('Login', function() {
+
+    // register a user
+    beforeEach(function(done) {
+      var validParams = {
+        username: 'u1',
+        password: 'p1',
+        email: 'test@test.com',
+        publicKey: 'test'
+      };
+      users.register(validParams, function(err, response) {
+        if(!err) {
+          done();
+        }
+      });
+    });
+
+    it('should allow a successful login', function() {
+      users.login({username: 'u1', password: 'p1'}, function(err, response) {
+        err.should.be.false;
+        response.should.equal('Successfully logged in');
+      });
+    });
+
+    it('should prevent logging in with an invalid username', function() {
+      users.login({username: 'u2', password: 'p1'}, function(err, response) {
+        err.should.be.true;
+        response.should.equal('Invalid username or password');
+      });
+    });
+
+    it('should prevent logging in with an invalid password', function() {
+      users.login({username: 'u1', password: 'bad'}, function(err, response) {
+        err.should.be.true;
+        response.should.equal('Invalid username or password');
+      });
+    });
   });
 });
