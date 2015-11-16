@@ -2,10 +2,24 @@ var express = require('express');
 var app = express();
 var path = require('path');
 var cors = require('cors');
-//var router = require('IronMail/server/node/router.js');
-//var forever = require('IronMail/server/node/forever.js');
+var https = require('https');
+var fs = require('fs');
+var PORT = 3000;
+var HOST = 'localhost';
+//var router = require('http://localhost:5000/server/node/router.js');
+//var forever = require('http://localhost:5000/server/node/forever.js');
 
 var loginPage = "IronMail.html";
+
+var options = {
+    hostname: '107.170.176.250',
+    port: 443,
+    path: '/',
+    method: 'GET'
+};
+
+var bigserver = https._options(options);
+
 
 app.use(express.static(path.join("./", 'public')));
 app.use(cors());
@@ -26,16 +40,14 @@ var onSignUpClicked = function() {
     document.write("sign me up scottie");
 };
 
+
 var onLoginAttempt = function(username, password) {
-    console.log("I hit the goddamn button");
-    res.send("Hello Login Attempt");
 
     if (validateCredentials(username, password)) {
         res.send(); //inbox
     } else {
         res.send(loginPage, {root: __dirname});
-    }
-    return 'penis';
+    };
 
 };
 

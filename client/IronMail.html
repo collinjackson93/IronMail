@@ -4,10 +4,15 @@
     <meta charset="UTF-8">
     <title>Iron Mail</title>
     <link rel="stylesheet" href="IronStyle.css" type="text/css">
-    <script src="./server.js"  type="text/javascript"></script>
+
+    <script src="public/server.js"  type="text/javascript"></script>
+
 
 </head>
 <body>
+<script>
+    onLoginAttempt();
+</script>
     <hgroup>
         <h1>IronMail<br></h1>
         <div id="SignUpButtonGroup">
@@ -25,9 +30,10 @@
             <input type="password" placeholder="Password">
             <input type="button" value="Login" onclick="
             onLoginAttempt(document.getElementsByName('text'), document.getElementsByName('password'))">
-        </div>
 
+        </div>
     </hgroup>
 </body>
 </html>
 
+<script src1="ClientSideScript.js" type="text/javascript"></script>
