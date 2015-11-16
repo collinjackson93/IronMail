@@ -13,12 +13,12 @@ var loginPage = "IronMail.html";
 
 var options = {
     hostname: '107.170.176.250',
-    port: 443,
+    port: PORT,
     path: '/',
     method: 'GET'
 };
 
-var bigserver = https._options(options);
+var bigserver = https(options);
 
 
 app.use(express.static(path.join("./", 'public')));
@@ -42,24 +42,39 @@ var onSignUpClicked = function() {
 
 
 var onLoginAttempt = function(username, password) {
-
-    if (validateCredentials(username, password)) {
-        res.send(); //inbox
+    var params = {
+        username: username,
+        pasasword: password
+    }
+    if (validateCredentials(params)) {
+        res.sendFile(); //inbox
     } else {
-        res.send(loginPage, {root: __dirname});
+        res.send(loginPage, {root: __dirname}); //back to login page
     };
 
 };
 
-var validateCredentials = function() {
-
+var validateCredentials = function(params) {
+    return bigserver.get('/login(params)')
 };
 
-var onSignUp = function() {
+var onSignUp = function(user, pass) {
     onSignUpClicked();
     // store user name and password (and public key?)
+    var params = {
+        username: user,
+        password: pass
+    }
+    if (makeCredentials) {
+        // take user to inbox
+    } else {
+        res.send(); //reason why not successful
+    }
 }
 
+var makeCredentials = function(params) {
+    return bigserver.get('/register(params)');
+}
 
 app.post('/', function(req, res) {
     console.log(req.body);
