@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>Iron Mail</title>
     <link rel="stylesheet" href="IronStyle.css" type="text/css">
-    <script src="ClientSideScript.js" type="text/javascript"></script>
+    <script src="./server.js"  type="text/javascript"></script>
+
 </head>
 <body>
     <hgroup>
@@ -15,15 +16,18 @@
             <input type="text" placeholder="Last">
             <input type="text" placeholder="Choose a userID">
             <input type="password" placeholder="Password">
-            <input type="submit" value="Sign up">
+            <input type="submit" value="Sign Up" onclick="onSignUp()">
         </div>
         <h2>Protecting your Fourth Amendment Rights</h2>
         <div id="LogInButtonGroup">
             <body></body>
             <input type="text" placeholder="User Name">
             <input type="password" placeholder="Password">
-            <input type="submit" value="Log in">
+            <input type="button" value="Login" onclick="
+            onLoginAttempt(document.getElementsByName('text'), document.getElementsByName('password'))">
         </div>
+
     </hgroup>
 </body>
 </html>
+
