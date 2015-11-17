@@ -6,8 +6,6 @@ var https = require('https');
 var fs = require('fs');
 // var PORT = 443;
 const HOST = '107.170.176.250';
-//var router = require('http://localhost:5000/server/node/router.js');
-//var forever = require('http://localhost:5000/server/node/forever.js');
 
 var loginPage = "IronMail.html";
 
@@ -36,12 +34,6 @@ app.get('/', function (req, res) {
     res.sendFile( __dirname + "/" + "IronMail.html" );
     console.log("sent the page");
 });
-
-var onSignUpClicked = function() {
-    console.log("this guy's signing up");
-    document.write("sign me up scottie");
-};
-
 
 var onLoginAttempt = function(username, password) {
     var params = {
@@ -83,9 +75,9 @@ var onSignUp = function(user, pass) {
         password: pass
     }
     if (makeCredentials) {
-        // take user to inbox
+        res.send(inboxPage)// take user to inbox
     } else {
-        res.send(); //reason why not successful
+        res.send("register failed"); //reason why not successful
     }
 }
 
