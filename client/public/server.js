@@ -4,21 +4,26 @@ var path = require('path');
 var cors = require('cors');
 var https = require('https');
 var fs = require('fs');
-var PORT = 3000;
-var HOST = 'localhost';
+// var PORT = 443;
+const HOST = '107.170.176.250';
 //var router = require('http://localhost:5000/server/node/router.js');
 //var forever = require('http://localhost:5000/server/node/forever.js');
 
 var loginPage = "IronMail.html";
 
-var options = {
-    hostname: '107.170.176.250',
-    port: PORT,
-    path: '/',
-    method: 'GET'
+const loginOptions = {
+    hostname: HOST,
+    path: '/login',
+    method: 'POST'
 };
 
-var bigserver = https(options);
+const registerOptions = {
+  hostname: HOST,
+  path: '/register',
+  method: 'POST'
+};
+
+// var bigserver = https(options);
 
 
 app.use(express.static(path.join("./", 'public')));
@@ -55,7 +60,22 @@ var onLoginAttempt = function(username, password) {
 };
 
 var validateCredentials = function(params) {
-    return bigserver.get('/login(params)')
+    // return bigserver.get('/login(params)')
+    var req = https.request(loginOptions, function(res) {
+      if (res.statusCode == 200) {
+        // success condition
+        return true;
+      } else {
+        res.on('data', function(d) {
+          // TODO: pass reason for failure
+          return false;
+        });
+      }
+    });
+    req.end();
+    req.on('error', function(e) {
+      console.error(e);
+    });
 };
 
 var onSignUp = function(user, pass) {
@@ -73,7 +93,22 @@ var onSignUp = function(user, pass) {
 }
 
 var makeCredentials = function(params) {
-    return bigserver.get('/register(params)');
+    // return bigserver.get('/register(params)');
+    var req = https.request(loginOptions, function(res) {
+      if (res.statusCode == 200) {
+        // success condition
+        return true;
+      } else {
+        res.on('data', function(d) {
+          // TODO: pass reason for failure
+          return false;
+        });
+      }
+    });
+    req.end();
+    req.on('error', function(e) {
+      console.error(e);
+    });
 }
 
 app.post('/', function(req, res) {
