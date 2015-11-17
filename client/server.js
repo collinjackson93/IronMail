@@ -23,9 +23,6 @@ const registerOptions = {
   method: 'POST'
 };
 
-// var bigserver = https(options);
-
-
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
@@ -36,7 +33,7 @@ var server = app.listen(5000, function () {
 });
 
 app.get('/', function (req, res) {
-    res.sendFile( __dirname + "/" + "index.html" );
+    res.sendFile( __dirname + "/" + "IronMail.html" );
     console.log("sent the page");
 });
 
