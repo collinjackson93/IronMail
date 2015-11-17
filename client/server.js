@@ -26,7 +26,7 @@ const registerOptions = {
 // var bigserver = https(options);
 
 
-app.use(express.static(path.join("./", 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
 var server = app.listen(5000, function () {
@@ -36,7 +36,7 @@ var server = app.listen(5000, function () {
 });
 
 app.get('/', function (req, res) {
-    res.sendFile(loginPage, {root: __dirname});
+    res.sendFile( __dirname + "/" + "index.html" );
     console.log("sent the page");
 });
 
