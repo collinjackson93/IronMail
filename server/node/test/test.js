@@ -6,12 +6,9 @@ chai.use(sinonChai);
 
 describe('Users', function() {
   var users = require('../routeLogic/users');
-
-  before(function() {
-    // use mocha-mongoose to automatically clear the database after each test
-    require('mocha-mongoose')('mongodb://mongo/ironmailtest');
-    require('../db/dbConnect');
-  });
+  // use mocha-mongoose to automatically clear the database after each test
+  var clearDB = require('mocha-mongoose')('mongodb://mongo/ironmailtest');
+  require('../db/dbConnect');
 
   describe('Registration', function() {
 
@@ -55,6 +52,17 @@ describe('Users', function() {
       users.register(badEmail, function(err, response) {
         err.should.be.true;
         response.should.equal("ValidationError: Validator failed for path `email` with value `notanEmail`");
+      });
+    });
+
+    it('should not store passwords in plain text', function() {
+      var userModel = require('../db/userModel');
+      users.register(validParams, function(err, response) {
+        err.should.be.false;
+        userModel.findOne({'username': validParams.username}, function(err, user) {
+          should.not.exist(err);
+          user.password.should.not.equal(validParams.password);
+        });
       });
     });
   });
