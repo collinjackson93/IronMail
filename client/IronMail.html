@@ -15,19 +15,23 @@
         <h1>IronMail<br></h1>
         <div id="SignUpButtonGroup">
             <body></body>
-            <input type="text" placeholder="First">
-            <input type="text" placeholder="Last">
-            <input type="text" placeholder="Choose a userID">
-            <input type="password" placeholder="Password">
-            <input type="submit" value="Sign Up" onclick="onSignUp()">
+            <input id="firstNameSignUp" type="text" placeholder="First">
+            <input id="lastNameSignUp" type="text" placeholder="Last">
+            <input id="idSignUp" type="text" placeholder="Choose a userID">
+            <input id="passwordSignUp" type="password" placeholder="Password">
+            <input type="submit" value="Sign Up"
+                   onclick="signUpForIronMail(document.getElementById('firstNameSignUp'),
+                   document.getElementById('lastNameSignUp'),
+                   document.getElementById('idSignUp'),
+                   document.getElementById('passwordSignUp'))">
         </div>
         <h2>Protecting your Fourth Amendment Rights</h2>
         <div id="LogInButtonGroup">
             <body></body>
-            <input type="text" placeholder="User Name">
+            <input type="text" placeholder="User Name" id="login">
             <input type="password" placeholder="Password">
             <input type="button" value="Login" onclick="
-            onLoginAttempt(document.getElementsByName('text'), document.getElementsByName('password'))">
+            onLoginAttempt(document.getElementById('login'), document.getElementsByName('password'))">
 
         </div>
     </hgroup>
