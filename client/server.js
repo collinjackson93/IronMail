@@ -40,31 +40,12 @@ var onLoginAttempt = function(username, password) {
         username: username,
         pasasword: password
     }
-    if (validateCredentials(params)) {
+    if (callServer(loginOptions, params)) {
         res.sendFile(); //inbox
     } else {
         res.send(loginPage, {root: __dirname}); //back to login page
     };
 
-};
-
-var validateCredentials = function(params) {
-    // return bigserver.get('/login(params)')
-    var req = https.request(loginOptions, function(res) {
-      if (res.statusCode == 200) {
-        // success condition
-        return true;
-      } else {
-        res.on('data', function(d) {
-          // TODO: pass reason for failure
-          return false;
-        });
-      }
-    });
-    req.end();
-    req.on('error', function(e) {
-      console.error(e);
-    });
 };
 
 var onSignUp = function(user, pass) {
@@ -74,30 +55,39 @@ var onSignUp = function(user, pass) {
         username: user,
         password: pass
     }
-    if (makeCredentials) {
+    if (callServer(registerOptions, params)) {
         res.send(inboxPage)// take user to inbox
     } else {
         res.send("register failed"); //reason why not successful
     }
 }
 
-var makeCredentials = function(params) {
-    // return bigserver.get('/register(params)');
-    var req = https.request(loginOptions, function(res) {
-      if (res.statusCode == 200) {
-        // success condition
-        return true;
-      } else {
-        res.on('data', function(d) {
-          // TODO: pass reason for failure
-          return false;
-        });
-      }
-    });
-    req.end();
-    req.on('error', function(e) {
-      console.error(e);
-    });
+// TODO: re-write this to take a callback so we can pass the failure reason
+function callServer(options, data) {
+  options.headers = {
+    'Content-Type': 'application/json',
+    'Content-Length': data.length
+  };
+
+  var req = https.request(options, function(res) {
+    if (res.statusCode == 200) {
+      // success condition
+      return true;
+    } else {
+      res.on('data', function(d) {
+        // TODO: pass reason for failure
+        return false;
+      });
+    }
+  });
+
+  req.on('error', function(e) {
+    console.error(e);
+    return false;
+  });
+
+  req.write(data);
+  req.end();
 }
 
 app.post('/', function(req, res) {
