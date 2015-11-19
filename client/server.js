@@ -1,18 +1,18 @@
 var express = require('express');
 var app = express();
 var path = require('path');
-var cors = require('cors');
+// var cors = require('cors');
 var https = require('https');
+var bodyParser = require('body-parser');
 var fs = require('fs');
-// var PORT = 443;
 const HOST = '107.170.176.250';
 
 var loginPage = "IronMail.html";
 
 const loginOptions = {
-    hostname: HOST,
-    path: '/login',
-    method: 'POST'
+  hostname: HOST,
+  path: '/login',
+  method: 'POST'
 };
 
 const registerOptions = {
@@ -22,43 +22,32 @@ const registerOptions = {
 };
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors());
-
-var server = app.listen(5000, function () {
-  console.log("Server listening at http://localhost:5000");
-  /*var pathname = server.pathname;
-  var port = server.port;*/
-});
-
-app.get('/', function (req, res) {
-    res.sendFile( __dirname + "/" + "IronMail.html" );
-    console.log("sent the page");
-});
+app.use(bodyParser.json());
+// app.use(cors());
 
 var onLoginAttempt = function(username, password) {
-    var params = {
-        username: username,
-        pasasword: password
-    }
-    if (callServer(loginOptions, params)) {
-        res.sendFile(); //inbox
-    } else {
-        res.send(loginPage, {root: __dirname}); //back to login page
-    };
-
+  var params = {
+    username: username,
+    pasasword: password
+  };
+  if (callServer(loginOptions, params)) {
+    res.send('logged in');
+  } else {
+    res.send('login failed');
+  };
 };
 
-var onSignUp = function(user, pass) {
+var onSignUp = function(user, pass, email) {
     onSignUpClicked();
     // store user name and password (and public key?)
     var params = {
         username: user,
         password: pass
-    }
+    };
     if (callServer(registerOptions, params)) {
-        res.send(inboxPage)// take user to inbox
+        res.send('signed up');
     } else {
-        res.send("register failed"); //reason why not successful
+        res.send("register failed");
     }
 }
 
@@ -90,7 +79,19 @@ function callServer(options, data) {
   req.end();
 }
 
-app.post('/', function(req, res) {
-    console.log(req.body);
-    onLoginAttempt(username, password);
+app.get('/', function (req, res) {
+  res.sendFile( __dirname + "/IronMail.html" );
+  console.log("sent the page");
+});
+
+app.post('/logIn', function(req, res) {
+  onLoginAttempt(req.body.username, req.body.password);
+});
+
+app.post('/addNewUser', function(req, res) {
+  onSignUp(req.body.username, req.body.password, req.body.email);
+});
+
+var server = app.listen(5000, function () {
+  console.log("Server listening at http://localhost:5000");
 });
