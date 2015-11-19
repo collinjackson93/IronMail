@@ -4,7 +4,11 @@
   - send: username, password
   - receive: login status (success or failure)
 - /register(POST):
-  - send: email, username, password, public key
+  - send: email, username, password, public-key
   - receive: registration status (success or failure with appropriate reason)
 
 # Client-Server to UI
+- /logIn(POST):
+  - send: username, password
+- /addNewUser(POST):
+  - send: username, email, password
