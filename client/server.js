@@ -38,8 +38,6 @@ var onLoginAttempt = function(username, password) {
 };
 
 var onSignUp = function(user, pass, email) {
-    onSignUpClicked();
-    // store user name and password (and public key?)
     var params = {
         username: user,
         password: pass
