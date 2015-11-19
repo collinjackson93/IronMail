@@ -19,12 +19,18 @@ function getPageWithCallback(url, callback) {
 }
 
 //invokes sign up logic on server
-function signUpForIronMail(firstname, lastname, id, passwd){
+function signUpForIronMail(firstname, lastname, id, passwd, passwdconfirm){
+    /* First check that passwords match */
+    if(passwd!==passwdconfirm){
+        alert('password does not match');
+        return;
+    }
+
     getPageWithCallback('/addNewUser?firstname=' + firstname +
         '&lastname=' + lastname +
         '&id=' + id + 
         '&passwd=' + passwd, function(response){
-        if(response = "invalid"){
+        if(response = "!!!invalid!!!"){
             alert('that username is not available, try another');
         }
         else{

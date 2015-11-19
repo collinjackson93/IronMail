@@ -1,35 +1,71 @@
+
+.header{
+    height: auto;
+    display: flex;
+    justify-content: center;
+}
+
+.title{
+    width: 80%;
+    align-self: center;
+}
+
+.mainpage{
+    height: auto;
+}
+
+.login{
+    width: 20%;
+    justify-content: center;
+    float: right;
+}
+
+.inline{
+    float: right;
+    display: inline;
+}
+
 hgroup {
     color: steelblue;
     border: groove;
-    align: center;
-    text-align: center;
     position: relative;
-}
-
-h1{
-    border: groove;
-}
-
-h2{
-    display: inline-flex;
-}
-
-#LogInButtonGroup{
-    float: right;
-    display: inline-flex;
-}
-
-#SignUpButtonGroup{
-    float: left;
-    display: inline-flex;
-}
-
-input{
-    display: block;
 }
 
 body{
     width: 90%;
     margin-left: auto;
     margin-right: auto;
+}
+
+button {
+    display: block;
+    background: rgba(115, 31, 185, 0.4);
+    border-radius: 5px;
+}
+button:hover{
+    background: rgba(115, 31, 185, 0.25);
+}
+
+.mainpage {
+    display: flex;
+}
+
+.signup{
+    float: left;
+    align-text: center;
+    width: 40%;
+}
+
+.features{
+    float: right;
+    flex-grow: 1;
+}
+
+.featuresList{
+    display: block;
+}
+
+div {
+    color: steelblue;
+    border: groove;
 }
