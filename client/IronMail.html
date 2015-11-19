@@ -9,20 +9,26 @@
 <body>
         <div class="header" width="90%" display="inline-flex">
                 <div class="title">
-                    IronMail: Secure Emailing for the Cautious Internet User<br>
-                    <quote>"Don't ever take a fence down until you know the reason it was put up. --G.K. Chesterton"</quote>
+                    <quote id="ironMailTitle">IronMail: Secure Emailing for the Cautious Internet User</quote><br>
+                    <quote>"Don't ever take a fence down until you know the reason it was put up." --G.K. Chesterton</quote>
                 </div>
                 <div class="login">
-                    <div>Existing User? Welcome Home.</div>
-                    <input type="text" placeholder="User ID">
-                    <input type="password" placeholder="Password">
-                    <button class="inline" type="submit">Log in</button>
+                    <div class="centered">Existing User? Welcome Home.</div>
+                    <div class="centered">
+                        <input id="logInUSERID" class="inline" type="text" placeholder="User ID">
+                        <input id="logInPASSWORD" class="inline" type="password" placeholder="Password">
+                        <button class="inline" type="submit" onclick="logInToIronMail(
+                            document.getElementById('logInUSERID'),
+                            document.getElementById('logInPASSWORD'))">Log in</button>
+                    </div>
                 </div>
         </div>
         <div class="mainpage">
             <div class="signup">
-                Sign up<br>
-                and say hello to digital security<br>
+                <quote>
+                    Sign up...<br>
+                    and say hello to digital security<br>
+                </quote>
                 <input id="signupFirstName" type="text" placeholder="First Name" required>
                 <input id="signupLastName" type="text" placeholder="Last Name" required><br>
                 <input id="signupUSERID" type="text" placeholder="User ID" required><br>
@@ -33,7 +39,7 @@
                     document.getElementById('signupLastName'),
                     document.getElementById('signupUSERID'),
                     document.getElementById('signupPASSWORD'),
-                    document.getElementById('signupPASSWORDCONFIRM'))">Sign Up!</button>
+                    document.getElementById('signupPASSWORDCONFIRM'))">Sign Up</button>
             </div>
             <div class="features">
                 <div class="featuresList">
@@ -46,9 +52,10 @@
                     </ul>
                 </div>
                 <div class="tutorial">
-                    <p>Tutorial--IronMail in 5 minutes</p>
+                    <p>Tutorial: IronMail in 5 minutes</p>
                     <div>
-                        <iframe src="https://www.youtube.com/embed/EuJbsF0yLfw" frameborder="0" allowfullscreen></iframe>
+                        <iframe height="300vh" width="100%"
+                                src="https://www.youtube.com/embed/EuJbsF0yLfw" frameborder="0" allowfullscreen></iframe>
                     </div>
                 </div>
             </div>

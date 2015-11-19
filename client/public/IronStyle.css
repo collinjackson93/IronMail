@@ -1,8 +1,16 @@
 
 .header{
+    background-color: rgba(132, 132, 130, 0.39);
+    padding: 5px;
     height: auto;
     display: flex;
     justify-content: center;
+}
+
+#ironMailTitle{
+    font-family: 'Copperplate';
+    font-size: 30px;
+    -webkit-text-stroke: 1px black;
 }
 
 .title{
@@ -11,24 +19,31 @@
 }
 
 .mainpage{
-    height: auto;
+    height: 80vh;
 }
 
 .login{
-    width: 20%;
+    padding: 5px;
+    border-radius: 2px;
+    background-color: rgba(0, 0, 139, 0.19);
+    width: 30%;
     justify-content: center;
     float: right;
+    border: 1px black solid;
+}
+
+.centered{
+    color: black;
+    font-size: 18px;
+    text-align: center;
 }
 
 .inline{
-    float: right;
     display: inline;
 }
 
-hgroup {
-    color: steelblue;
-    border: groove;
-    position: relative;
+input{
+    padding: 5px;
 }
 
 body{
@@ -47,16 +62,20 @@ button:hover{
 }
 
 .mainpage {
+    background-color: rgba(0, 0, 0, 0.07);
     display: flex;
+    padding: 5px;
 }
 
 .signup{
+    padding: 5px;
     float: left;
     align-text: center;
     width: 40%;
 }
 
 .features{
+    padding: 5px;
     float: right;
     flex-grow: 1;
 }
@@ -67,5 +86,20 @@ button:hover{
 
 div {
     color: steelblue;
-    border: groove;
+}
+
+.featuresList, .tutorial, .signup{
+    font-family: 'Copperplate Gothic Light';
+    font-size: 20px;
+    color: black;
+}
+
+li{
+    font-family: 'Avant Garde';
+    font-size: 18px;
+    color: black;
+}
+
+iframe{
+    height: calc(50vh - 30px);
 }
