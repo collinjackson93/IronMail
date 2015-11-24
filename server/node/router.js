@@ -8,7 +8,8 @@ app.use(bodyParser.json());
 app.use(session({secret: 'IronMailSessionSecret'}));
 
 app.get('/', function (req, res) {
-  res.send('Testing');
+  var user = req.session.username ? req.session.username : 'Stranger';
+  res.send('Hello ' + user);
 });
 
 app.post('/login', function(req, res) {

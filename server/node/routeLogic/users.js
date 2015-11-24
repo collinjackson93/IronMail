@@ -9,7 +9,7 @@ function login(params, cb) {
       // incorrect username
       cb(true, invalidLogin);
     } else {
-      if(bcrypt.compareSync(params.username, user.password)) {
+      if(bcrypt.compareSync(params.password, user.password)) {
         cb(false, 'Successfully logged in');
       } else {
         cb(true, invalidLogin);
