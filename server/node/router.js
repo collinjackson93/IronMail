@@ -1,9 +1,11 @@
 var app = require('express')();
 var bodyParser = require('body-parser');
+var session = require('express-session');
 var users = require('./routeLogic/users');
 require('./db/dbConnect');
 
 app.use(bodyParser.json());
+app.use(session({secret: 'IronMailSessionSecret'}));
 
 app.get('/', function (req, res) {
   res.send('Testing');
@@ -14,7 +16,19 @@ app.post('/login', function(req, res) {
     if (err) {
       res.status(401).send(response);
     } else {
+      req.session.username = req.body.username;
       res.send(response);
+    }
+  });
+});
+
+app.get('/logout', function(req, res) {
+  req.session.destroy(function(err) {
+    if (err) {
+      console.error(err);
+      res.send('Error while logging out: ' + err);
+    } else {
+      res.send('Logged out');
     }
   });
 });
@@ -24,6 +38,7 @@ app.post('/register', function(req, res) {
     if (err) {
       res.status(400).send(response);
     } else {
+      req.session.username = req.body.username;
       res.send(response);
     }
   });
