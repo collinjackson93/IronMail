@@ -78,7 +78,7 @@ describe('Users', function() {
         publicKey: 'test'
       };
       users.register(validParams, function(err, response) {
-        if(!err) {
+        if (!err) {
           done();
         }
       });
@@ -102,6 +102,50 @@ describe('Users', function() {
       users.login({username: 'u1', password: 'bad'}, function(err, response) {
         err.should.be.true;
         response.should.equal('Invalid username or password');
+      });
+    });
+  });
+
+  describe('List', function() {
+    // register some users
+    beforeEach(function(done) {
+      var validParams = {
+        username: 'u1',
+        password: 'p1',
+        email: 'test@test.com',
+        publicKey: 'test'
+      };
+      users.register(validParams, function(err, response) {
+        if (!err) {
+          validParams.username = 'u2';
+          users.register(validParams, function(err, response) {
+            if (!err) {
+              validParams.username = 'differentName';
+              users.register(validParams, function(err, response) {
+                if (!err) {
+                  done();
+                }
+              });
+            }
+          });
+        }
+      });
+    });
+
+    it('should list all users when provided with an empty string', function() {
+      users.list({username: ''}, function(err, users) {
+        users.should.have.length(3);
+      });
+    });
+
+    it('should list users that match the given criteria', function() {
+      users.list({username: 'u'}, function(err, users) {
+        users.should.have.length(2);
+        var expectedReturn = [
+          {username: 'u1', publicKey: 'test'},
+          {username: 'u2', publicKey: 'test'}
+        ];
+        users.should.deep.equal(expectedReturn);
       });
     });
   });
