@@ -150,3 +150,47 @@ describe('Users', function() {
     });
   });
 });
+
+describe('Messages', function() {
+  var messages = require('../routeLogic/messages');
+  var clearDB = require('mocha-mongoose')('mongodb://mongo/ironmailtest', {noClear: true});
+  require('../db/dbConnect');
+
+  before(function(done) {
+    clearDB(done);
+  });
+  // register some users
+  // before(function(done) {
+  //   var users = require('../routeLogic/users');
+  //   var validParams = {
+  //     username: 'u1',
+  //     password: 'p1',
+  //     email: 'test@test.com',
+  //     publicKey: 'test'
+  //   };
+  //   users.register(validParams, function(err, response) {
+  //     if (!err) {
+  //       validParams.username = 'u2';
+  //       users.register(validParams, function(err, response) {
+  //         if (!err) {
+  //           done();
+  //         }
+  //       });
+  //     }
+  //   });
+  // });
+
+  it('should save a properly formatted message', function() {
+    messages.send({receiver: 'u2', sharedPrime: 13, subject: 'Testing', content: 'Secret'}, 'u1', function(err, response) {
+      err.should.be.false;
+      response.should.equal('Message sent');
+    });
+  });
+
+  it('should not send a message to a user that does not exist', function() {
+    messages.send({receiver: 'invalid', sharedPrime: 13, subject: 'Testing', content: 'Secret'}, 'u1', function(err, response) {
+      err.should.be.true;
+      response.should.equal("ValidationError: Validator failed for path `receiver` with value `invalid`");
+    });
+  });
+});
