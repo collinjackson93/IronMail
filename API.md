@@ -6,6 +6,11 @@
 - /register(POST):
   - send: email, username, password, public-key
   - receive: registration status (success or failure with appropriate reason)
+- /user(POST):
+  - send: username (partial name starting from beginning)
+  - receive: potentially empty list of user objects that each have username and publicKey
+- /logout(GET):
+  - receive: message indicating success or failure to logout
 
 # Client-Server to UI
 - /logIn(POST):

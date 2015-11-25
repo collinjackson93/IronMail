@@ -27,9 +27,19 @@ app.get('/logout', function(req, res) {
   req.session.destroy(function(err) {
     if (err) {
       console.error(err);
-      res.send('Error while logging out: ' + err);
+      res.status(500).send('Error while logging out: ' + err);
     } else {
       res.send('Logged out');
+    }
+  });
+});
+
+app.post('/user', function(req, res) {
+  users.list(req.body, function(err, response) {
+    if (err) {
+      res.status(500).send(response);
+    } else {
+      res.send(response);
     }
   });
 });

@@ -34,6 +34,16 @@ function register(params, cb) {
   })
 }
 
+function list(params, cb) {
+  var usernameRegex = '^' + escapeRegExp(params.username);
+  User.find({'username': new RegExp(usernameRegex, 'i')}, '-_id username publicKey', cb);
+}
+
+// copied from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Creating_a_regular_expression
+function escapeRegExp(string){
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function hashPass(plainText) {
   bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
     bcrypt.hash(plainText, salt, function(err, hash) {
@@ -44,5 +54,6 @@ function hashPass(plainText) {
 
 module.exports = {
   login: login,
-  register: register
+  register: register,
+  list: list
 }
