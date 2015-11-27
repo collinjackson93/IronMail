@@ -37,15 +37,26 @@ var onLoginAttempt = function(username, password) {
   };
 };
 
+
+var callback = function(error, returnval) {
+  if (error) {
+    console.log(error);
+    return;
+  } else {
+    return returnval;
+  }
+}
+
 var onSignUp = function(user, pass, email) {
     var params = {
         username: user,
         password: pass
     };
-    if (callServer(registerOptions, params)) {
+    if (callServer(registerOptions, params, callback)) {
         res.send('signed up');
     } else {
         res.send("register failed");
+        callback(new Error);
     }
 }
 
