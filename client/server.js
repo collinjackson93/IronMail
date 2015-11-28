@@ -37,7 +37,7 @@ var onLoginAttempt = function(username, password) {
   };
 };
 
-
+// TODO: ask collin to take a look at this to see what he needs to for error cases
 var callback = function(error, returnval) {
   if (error) {
     console.log(error);
@@ -45,7 +45,7 @@ var callback = function(error, returnval) {
   } else {
     return returnval;
   }
-}
+};
 
 var onSignUp = function(user, pass, email) {
     var params = {
@@ -60,8 +60,8 @@ var onSignUp = function(user, pass, email) {
     }
 }
 
-// TODO: re-write this to take a callback so we can pass the failure reason
-function callServer(options, data) {
+// TODO: re-write this to use callback to pass explanation of errors
+function callServer(options, data, cb) {
   options.headers = {
     'Content-Type': 'application/json',
     'Content-Length': data.length
@@ -74,6 +74,8 @@ function callServer(options, data) {
     } else {
       res.on('data', function(d) {
         // TODO: pass reason for failure
+        // talk to Collin about this process
+        cb();
         return false;
       });
     }
@@ -100,6 +102,10 @@ app.post('/logIn', function(req, res) {
 app.post('/addNewUser', function(req, res) {
   onSignUp(req.body.username, req.body.password, req.body.email);
 });
+
+app.post('/sendEmail', function(req, res) {
+  onEmailSent(/*user destination, public key, email content to be encrypted*/)
+})
 
 var server = app.listen(5000, function () {
   console.log("Server listening at http://localhost:5000");
