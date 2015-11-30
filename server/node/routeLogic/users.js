@@ -36,7 +36,18 @@ function register(params, cb) {
 
 function list(params, cb) {
   var usernameRegex = '^' + escapeRegExp(params.username);
-  User.find({'username': new RegExp(usernameRegex, 'i')}, '-_id username publicKey', cb);
+  User.find({'username': new RegExp(usernameRegex, 'i')}, '-_id username publicKey', function(err, data) {
+    if (err) {
+      cb(err, null);
+    } else {
+      // remove extra fields returned my Mongoose
+      var retArray = [];
+      for(var i = 0; i < data.length; ++i) {
+        retArray.push(data[i].toObject());
+      }
+      cb(null, retArray);
+    }
+  });
 }
 
 // copied from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Creating_a_regular_expression

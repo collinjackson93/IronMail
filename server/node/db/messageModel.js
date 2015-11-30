@@ -11,9 +11,9 @@ var messageSchema = new Schema({
 });
 
 // check that user exists in database
-function validUser(username) {
+function validUser(username, cb) {
   User.count({username: username}, function(err, count) {
-    return !err && count === 1;
+    cb(!err && count === 1);
   });
 }
 
