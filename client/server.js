@@ -25,26 +25,13 @@ const logoutOptions = {
   hostname: HOST,
   path: '/logout',
   method: 'GET'
-}
+};
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 // app.use(cors());
 
-// **Default Callback**
-// Default callback function that is sent to cloud server
-// and used to pass back reasons that certain actions fail
-// TODO: ask collin to take a look at this to see what he needs for error cases
-var callback = function(error, returnval) {
-  if (error) {
-    console.log(error);
-    return;
-  }
-  //console.log(returnval);
-};
-
 // all calls to server sent through this function
-// TODO: re-write this to use callback to pass explanation of errors
 function callServer(options, data, cb) {
   options.headers = {
     'Content-Type': 'application/json',
@@ -52,77 +39,81 @@ function callServer(options, data, cb) {
   };
 
   var req = https.request(options, function(res) {
-    if (res.statusCode == 200) {
-      // success condition
-      return true;
-    } else {
-      res.on('data', function(d) {
-        // TODO: pass reason for failure
-        // talk to Collin about this process
-        cb();
-        return false;
-      });
-    }
+    res.on('data', function(data) {
+      // if the status code is not 200, there was an error
+      var error = res.statusCode !== 200;
+      cb(error, data);
+    });
   });
 
   req.on('error', function(e) {
     console.error(e);
-    return false;
+    cb(true, e);
   });
 
   req.write(data);
   req.end();
 };
 
-var onLoginAttempt = function(username, password) {
+function onLoginAttempt(username, password) {
   var params = {
     username: username,
     pasasword: password
   };
-  if (callServer(loginOptions, params, callback)) {
-    res.send('logged in');
-  } else {
-    res.send('login failed');
-  };
-};
+  callServer(loginOptions, params, function(err, val) {
+    if (err) {
+      res.send('login failed');
+      console.error(val);
+    } else {
+      res.send('logged in');
+    }
+  });
+}
 
-var onLogoutAttempt = function(username) {
+function onLogoutAttempt(username) {
   var params = {
     username: username
   };
-  if (callServer(logoutOptions, params, callback)) {
-    res.send('logged out');
-  } else {
-    res.send('logout failed');
-  }
-};
-
-var onSignUp = function(user, pass, email) {
-    var params = {
-        username: user,
-        password: pass
-    };
-    if (callServer(registerOptions, params, callback)) {
-        res.send('signed up');
+  callServer(logoutOptions, params, function(err, val) {
+    if (err) {
+      res.send('logout failed');
+      console.error(val);
     } else {
-        res.send("register failed");
+      res.send('logged out');
     }
+  });
 }
 
-var onSentEmail = function(from, to, email) {
+function onSignUp(user, pass, email) {
+  var params = {
+    username: user,
+    password: pass
+  };
+  callServer(registerOptions, params, function(err, val) {
+    if (err) {
+      res.send("register failed");
+      console.error(val);
+    } else {
+      res.send('signed up');
+    }
+  });
+}
+
+function onSentEmail(from, to, email) {
   var params = {
     from: from,
     to: to,
     subject: email.subject,
     body: email.body
-  }
-
-  if (callServer(sendMailOptions, params, callback)) {
-    res.send('email sent');
-  } else {
-    res.send('email failed to send');
   };
-};
+  callServer(sendMailOptions, params, function(err, val) {
+    if (err) {
+      res.send('email failed to send');
+    } else {
+      res.send('email sent');
+    }
+  });
+}
 
 app.get('/', function (req, res) {
   res.sendFile( __dirname + "/IronMail.html" );
