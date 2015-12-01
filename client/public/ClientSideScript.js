@@ -4,9 +4,13 @@
 var areWeSignedUp = false;
 var areWeLoggedIn = false;
 var whoIsLoggedInID = "";
+var d3 = require("d3");
+var $ = require("jquery");
+var publicKey = "";
+var privateKey = "";
 
 /* AJAX request function that requires response
-   CITATION: GOT THIS FROM CODE I WROTE PREVIOUSLY FOR the ORACLEOFOMAHA assignment */
+ CITATION: GOT THIS FROM CODE I WROTE PREVIOUSLY FOR the ORACLEOFOMAHA assignment */
 function getPageWithCallback(url, callback) {
     var httpRequest = new XMLHttpRequest();
     httpRequest.onreadystatechange = function() {
@@ -19,22 +23,49 @@ function getPageWithCallback(url, callback) {
 }
 
 //invokes sign up logic on server
-function signUpForIronMail(firstname, lastname, id, passwd, passwdconfirm){
+function signUpForIronMail(firstname, lastname, email, id, passwd, passwdconfirm){
     /* First check that passwords match */
-    if(passwd!==passwdconfirm){
+    if(passwd.value!==passwdconfirm.value){
+        d3.select("#signupPASSWORD").property("value", function(){
+            return "";
+        });
+        d3.select("#signupPASSWORDCONFIRM").property("value", function(){
+            return "";
+        });
         alert('password does not match');
-        return;
+        return; //wipe fields and return if no match
     }
 
+    var response = "valid";
     getPageWithCallback('/addNewUser?firstname=' + firstname +
         '&lastname=' + lastname +
-        '&id=' + id + 
+        '&email=' + email +
+        '&id=' + id +
         '&passwd=' + passwd, function(response){
-        if(response = "!!!invalid!!!"){
+        if(response === "!!!invalid!!!"){
+            d3.select("#signupUSERID").property("value", function(){
+                return "";
+            });
+            d3.select("#signupPASSWORD").property("value", function(){
+                return "";
+            });
+            d3.select("#signupPASSWORDCONFIRM").property("value", function(){
+                return "";
+            });
             alert('that username is not available, try another');
         }
         else{
-            console.log('successful sign up for user ' + response);
+            var lefttab = d3.select("#lefttab");
+            var righttab = d3.select('#righttab');
+            var corner = d3.select('#upperrightcorner');
+
+            //wipe the login screens, prepare to load emails
+            lefttab.selectAll('div').remove();
+            righttab.selectAll('div').remove();
+            corner.selectAll('div').remove();
+
+            var newdiv = corner.append('div').attr("class", "centered");
+            newdiv.append('button').attr('text', "hello");
         }
 
     });
@@ -68,3 +99,12 @@ function logOut(){
     console.log('clear web page');
 }
 
+function publicPrivateKeypair(){
+    getPageWithCallback('/publicPrivateKeyGen', function(response){
+        publicKey = response["public"];
+        privateKey =
+            alert(publicKey);
+        d3.select("#righttab").selectAll('div').remove();
+        d3.select('#righttab').append('p').text(publicKey);
+    });
+}
