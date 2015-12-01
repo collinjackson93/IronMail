@@ -1,5 +1,6 @@
-var User = require('../db/userModel');
 var bcrypt = require('bcrypt');
+var User = require('../db/userModel');
+var dbHelper = require('../db/dbHelper');
 const SALT_WORK_FACTOR = 10;
 
 function login(params, cb) {
@@ -37,16 +38,7 @@ function register(params, cb) {
 function list(params, cb) {
   var usernameRegex = '^' + escapeRegExp(params.username);
   User.find({'username': new RegExp(usernameRegex, 'i')}, '-_id username publicKey', function(err, data) {
-    if (err) {
-      cb(err, null);
-    } else {
-      // remove extra fields returned my Mongoose
-      var retArray = [];
-      for(var i = 0; i < data.length; ++i) {
-        retArray.push(data[i].toObject());
-      }
-      cb(null, retArray);
-    }
+    dbHelper.docsToObjects(err, data, cb);
   });
 }
 
