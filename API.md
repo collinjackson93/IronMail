@@ -11,9 +11,11 @@
   - receive: potentially empty list of user objects that each have username and publicKey
 - /logout(GET):
   - receive: message indicating success or failure to logout
-- /sendMessages(POST):
+- /sendMessage(POST):
   - send: receiver, prime, subject, content
   - receive: sending status (success or failure reason)
+- /getMessages(GET):
+  - receive: list of message objects with \_id, sender, receiver, sharedPrime, subject, content(encrypted)
 
 # Client-Server to UI
 - /logIn(POST):
