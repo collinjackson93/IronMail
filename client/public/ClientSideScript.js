@@ -72,15 +72,11 @@ function signUpForIronMail(firstname, lastname, email, id, passwd, passwdconfirm
 }
 
 //invokes log in on server
-function logInToIronMail(id, passwd){
-    getPageWithCallback('/logIn?id=' + id + '&passwd=' + passwd, function(response){
+function logInToIronMail(username, password){
 
-        if(!response){
-            alert('login was invalid');
-        }
-        else{
-            console.log('successful login');
-        }
+    getPageWithCallback('/logIn?username=' + username + '&password=' + password, function(response){
+
+        alert(response);
 
     })
 }
