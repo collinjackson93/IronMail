@@ -27,6 +27,12 @@ const logoutOptions = {
   method: 'GET'
 };
 
+const sentMessageOptions = {
+  hostname: HOST,
+  path: '/sendMessage',
+  method: 'POST'
+}
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 // app.use(cors());
@@ -60,14 +66,7 @@ function onLoginAttempt(username, password) {
     username: username,
     pasasword: password
   };
-  callServer(loginOptions, params, function(err, val) {
-    if (err) {
-      res.send('login failed');
-      console.error(val);
-    } else {
-      res.send('logged in');
-    }
-  });
+  callServer(loginOptions, params, cb);
 }
 
 function onLogoutAttempt(username) {
@@ -121,16 +120,26 @@ app.get('/', function (req, res) {
 });
 
 app.post('/logIn', function(req, res) {
-  onLoginAttempt(req.body.username, req.body.password);
+  var cb = function(err, val) {
+    if (err) {
+      res.send('login failed');
+      console.error(val);
+    } else {
+      res.send('logged in');
+    }
+  };
+  onLoginAttempt(req.body.username, req.body.password, cb);
 });
 
 app.post('/addNewUser', function(req, res) {
+
   onSignUp(req.body.username, req.body.password, req.body.email);
 });
 
 // TODO: what will emails and receivers of emails be called/look like in terms of requests?
-app.post('/sendEmail', function(req, res) {
-  onSentEmail(req.body.username, req.body.address, req.body.email);
+app.post('/sendMessage', function(req, res) {
+  
+  onSentMessage(req.body.username, req.body.address, req.body.email);
 });
 
 app.get('/logout', function(req, res) {
