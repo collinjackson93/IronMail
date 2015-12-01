@@ -61,7 +61,7 @@ function callServer(options, data, cb) {
   req.end();
 };
 
-function onLoginAttempt(username, password) {
+function onLoginAttempt(username, password, cb) {
   var params = {
     username: username,
     pasasword: password
@@ -138,7 +138,7 @@ app.post('/addNewUser', function(req, res) {
 
 // TODO: what will emails and receivers of emails be called/look like in terms of requests?
 app.post('/sendMessage', function(req, res) {
-  
+
   onSentMessage(req.body.username, req.body.address, req.body.email);
 });
 
