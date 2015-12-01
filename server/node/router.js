@@ -2,6 +2,7 @@ var app = require('express')();
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var users = require('./routeLogic/users');
+var messages = require('./routeLogic/messages');
 require('./db/dbConnect');
 
 app.use(bodyParser.json());
@@ -23,6 +24,7 @@ app.post('/login', function(req, res) {
   });
 });
 
+// TODO: ensure that user is logged in
 app.get('/logout', function(req, res) {
   req.session.destroy(function(err) {
     if (err) {
@@ -39,7 +41,7 @@ app.post('/user', function(req, res) {
     if (err) {
       res.status(500).send(response);
     } else {
-      res.send(response);
+      res.json(response);
     }
   });
 });
@@ -53,6 +55,29 @@ app.post('/register', function(req, res) {
       res.send(response);
     }
   });
+});
+
+// TODO: ensure that user is logged in
+app.post('/sendMessage', function(req, res) {
+  messages.send(req.body, req.session.username, function(err, response) {
+    if (err) {
+      res.status(400).send(response);
+    } else {
+      res.send(response);
+    }
+  });
+});
+
+// TODO: ensure that user is logged in
+app.get('/getMessages', function(req, res) {
+  res.status(500).send('Not implemented yet');
+  messages.get(req.session.username, function(err, response) {
+    if (err) {
+      res.status(500).send(response);
+    } else {
+      res.json(response);
+    }
+  })
 });
 
 var server = app.listen(3000, function () {

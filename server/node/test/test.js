@@ -204,4 +204,19 @@ describe('Messages', function() {
       done();
     });
   });
+
+  it('should get all messages sent to a user', function(done) {
+    messages.get('u2', function(err, response) {
+      // err.should.be.false;
+      response.should.have.length(1);
+      var retrievedMessage = response[0];
+      retrievedMessage.should.have.keys('_id', 'sender', 'receiver', 'sharedPrime', 'subject', 'content');
+      retrievedMessage.sender.should.equal('u1');
+      retrievedMessage.receiver.should.equal('u2');
+      retrievedMessage.sharedPrime.should.equal(13);
+      retrievedMessage.subject.should.equal('Testing');
+      retrievedMessage.content.should.equal('Secret');
+      done();
+    });
+  });
 });

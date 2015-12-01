@@ -1,4 +1,5 @@
 var Message = require('../db/messageModel');
+var dbHelper = require('../db/dbHelper');
 
 function send(params, sender, cb) {
   var message = new Message({
@@ -17,6 +18,13 @@ function send(params, sender, cb) {
   });
 }
 
+function get(receiver, cb) {
+  Message.find({'receiver': receiver}, '-__v', function(err, data) {
+    dbHelper.docsToObjects(err, data, cb);
+  });
+}
+
 module.exports = {
-  send: send
+  send: send,
+  get: get
 }
