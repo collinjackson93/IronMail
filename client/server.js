@@ -9,6 +9,10 @@ const HOST = '107.170.176.250';
 var cookies = require('cookies');
 var loginPage = "IronMail.html";
 
+var server = app.listen(5000, function () {
+  console.log("Server listening at http://localhost:5000");
+});
+
 const loginOptions = {
   hostname: HOST,
   path: '/login',
@@ -31,13 +35,13 @@ const sentMessageOptions = {
   hostname: HOST,
   path: '/sendMessage',
   method: 'POST'
-}
+};
 
 const getMessagesOptions = {
   hostname: HOST,
   path: '/getMessages',
   method: 'GET'
-}
+};
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
@@ -67,6 +71,44 @@ function callServer(options, data, cb) {
   req.end();
 };
 
+// sends webpage initially
+app.get('/', function (req, res) {
+  res.sendFile( __dirname + "/IronMail.html" );
+  console.log("sent the page");
+});
+
+// ***REGISTRATION***
+app.post('/addNewUser', function(req, res) {
+  var cb = function(err, val) {
+    if (err) {
+      res.send("register failed");
+      console.error(val);
+    } else {
+      res.send('signed up');
+    }
+  };
+  onSignUp(req.body.username, req.body.password, req.body.email, cb);
+});
+function onSignUp(user, pass, email, cb) {
+  var params = {
+    username: user,
+    password: pass
+  };
+  callServer(registerOptions, params, cb);
+}
+
+// ***LOGIN***
+app.post('/logIn', function(req, res) {
+  var cb = function(err, val) {
+    if (err) {
+      res.send('login failed');
+      console.error(val);
+    } else {
+      res.send('logged in');
+    }
+  };
+  onLoginAttempt(req.body.username, req.body.password, cb);
+});
 function onLoginAttempt(username, password, cb) {
   var params = {
     username: username,
@@ -75,6 +117,48 @@ function onLoginAttempt(username, password, cb) {
   callServer(loginOptions, params, cb);
 }
 
+// ***SEND EMAIL***
+// TODO: what will emails and receivers of emails be called/look like in terms of requests?
+app.post('/sendMessage', function(req, res) {
+  var cb = function(err, val) {
+    if (err) {
+      res.send('email failed to send');
+    } else {
+      res.send('email sent');
+    }
+  };
+  onSentMessage(req.body.username, req.body.address, req.body.email, cb);
+});
+function onSentEmail(from, to, email, cb) {
+  var params = {
+    from: from,
+    to: to,
+    subject: email.subject,
+    body: email.body
+  };
+  callServer(sendMailOptions, params, cb);
+}
+
+// ***RETRIEVE MESSAGES***
+app.get('/getMessages', function(req, res) {
+  var cb = function(err, val) {
+    if (err) {
+      res.send('failed to retrieve messages');
+    } else {
+      res.send();
+    }
+  }
+  onGetMessages(cb);
+});
+function retrieveMessages(cb) {
+  var params = {};
+  callServer(getMessagesOptions, params, cb);
+};
+
+// ***LOGOUT***
+app.get('/logout', function(req, res) {
+  onLogoutAttempt();
+});
 function onLogoutAttempt(username, cb) {
   var params = {
     username: username
@@ -89,73 +173,4 @@ function onLogoutAttempt(username, cb) {
   });
 }
 
-function onSignUp(user, pass, email, cb) {
-  var params = {
-    username: user,
-    password: pass
-  };
-  callServer(registerOptions, params, cb);
-}
 
-function onSentEmail(from, to, email) {
-  var params = {
-    from: from,
-    to: to,
-    subject: email.subject,
-    body: email.body
-  };
-  callServer(sendMailOptions, params, function(err, val) {
-    if (err) {
-      res.send('email failed to send');
-    } else {
-      res.send('email sent');
-    }
-  });
-}
-
-app.get('/', function (req, res) {
-  res.sendFile( __dirname + "/IronMail.html" );
-  console.log("sent the page");
-});
-
-app.post('/logIn', function(req, res) {
-  var cb = function(err, val) {
-    if (err) {
-      res.send('login failed');
-      console.error(val);
-    } else {
-      res.send('logged in');
-    }
-  };
-  onLoginAttempt(req.body.username, req.body.password, cb);
-});
-
-app.post('/addNewUser', function(req, res) {
-  var cb = function(err, val) {
-    if (err) {
-      res.send("register failed");
-      console.error(val);
-    } else {
-      res.send('signed up');
-    }
-  };
-  onSignUp(req.body.username, req.body.password, req.body.email, cb);
-});
-
-// TODO: what will emails and receivers of emails be called/look like in terms of requests?
-app.post('/sendMessage', function(req, res) {
-
-  onSentMessage(req.body.username, req.body.address, req.body.email);
-});
-
-app.get('/logout', function(req, res) {
-  onLogoutAttempt();
-});
-
-var server = app.listen(5000, function () {
-  console.log("Server listening at http://localhost:5000");
-});
-
-app.get('/getMessages', function(req, res) {
-  onGetMessages();
-});
