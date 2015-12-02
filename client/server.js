@@ -118,23 +118,28 @@ function onLoginAttempt(username, password, cb) {
 }
 
 // ***SEND EMAIL***
-// TODO: what will emails and receivers of emails be called/look like in terms of requests?
 app.post('/sendMessage', function(req, res) {
   var cb = function(err, val) {
     if (err) {
-      res.send('email failed to send');
+      res.send(val);
     } else {
       res.send('email sent');
     }
   };
-  onSentMessage(req.body.username, req.body.address, req.body.email, cb);
+  onSentMessage(req.body.receiver, req.body.subject, req.body.content, cb);
 });
-function onSentEmail(from, to, email, cb) {
+function onSentMessage(receiver, sub, content, cb) {
+  //encrypt content
+  //generate prime
+
+  var aPrime = 101119;
+  var secureContent = encrypt(content);
+
   var params = {
-    from: from,
-    to: to,
-    subject: email.subject,
-    body: email.body
+    receiver: receiver,
+    subject: sub,
+    prime: aPrime,
+    content: secureContent
   };
   callServer(sendMailOptions, params, cb);
 }
@@ -145,7 +150,8 @@ app.get('/getMessages', function(req, res) {
     if (err) {
       res.send('failed to retrieve messages');
     } else {
-      res.send();
+      console.log('messages retrieved');
+      res.send(val);
     }
   }
   onGetMessages(cb);
@@ -157,20 +163,19 @@ function retrieveMessages(cb) {
 
 // ***LOGOUT***
 app.get('/logout', function(req, res) {
-  onLogoutAttempt();
-});
-function onLogoutAttempt(username, cb) {
-  var params = {
-    username: username
-  };
-  callServer(logoutOptions, params, function(err, val) {
+  var cb = function(err, val) {
     if (err) {
       res.send('logout failed');
       console.error(val);
     } else {
       res.send('logged out');
     }
-  });
-}
+  };
+  onLogoutAttempt(cb);
+});
+function onLogoutAttempt(cb) {
+  var params = {};
+  callServer(logoutOptions, params, cb);
+};
 
 
