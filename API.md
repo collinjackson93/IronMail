@@ -18,7 +18,17 @@
   - receive: list of message objects with \_id, sender, receiver, sharedPrime, subject, content(encrypted)
 
 # Client-Server to UI
+- / (GET):
+  - receive: /IronMail.html  i.e. it res.sends the webpage
 - /logIn(POST):
   - send: username, password
+  - receive: login status (sucess or failure&why)
 - /addNewUser(POST):
   - send: username, email, password
+  - receive registration status (success or failure&why), logic should end up being similar to login unless we want a "welcome new user" page or something
+- /getMessages(GET)
+  - receive: list of message objects with \_id, sender, receiver, sharedPrime, subject, content (decrypted)
+- /sendMessage(POST)
+	- send: receiver, subject, content (body of the email)
+- /logout(GET)
+	- receive: message indicating success or failure
