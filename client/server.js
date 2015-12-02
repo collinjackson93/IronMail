@@ -6,7 +6,7 @@ var https = require('https');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 const HOST = '107.170.176.250';
-
+var cookies = require('cookies');
 var loginPage = "IronMail.html";
 
 const loginOptions = {
@@ -31,6 +31,12 @@ const sentMessageOptions = {
   hostname: HOST,
   path: '/sendMessage',
   method: 'POST'
+}
+
+const getMessagesOptions = {
+  hostname: HOST,
+  path: '/getMessages',
+  method: 'GET'
 }
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -69,7 +75,7 @@ function onLoginAttempt(username, password, cb) {
   callServer(loginOptions, params, cb);
 }
 
-function onLogoutAttempt(username) {
+function onLogoutAttempt(username, cb) {
   var params = {
     username: username
   };
@@ -83,19 +89,12 @@ function onLogoutAttempt(username) {
   });
 }
 
-function onSignUp(user, pass, email) {
+function onSignUp(user, pass, email, cb) {
   var params = {
     username: user,
     password: pass
   };
-  callServer(registerOptions, params, function(err, val) {
-    if (err) {
-      res.send("register failed");
-      console.error(val);
-    } else {
-      res.send('signed up');
-    }
-  });
+  callServer(registerOptions, params, cb);
 }
 
 function onSentEmail(from, to, email) {
@@ -132,8 +131,15 @@ app.post('/logIn', function(req, res) {
 });
 
 app.post('/addNewUser', function(req, res) {
-
-  onSignUp(req.body.username, req.body.password, req.body.email);
+  var cb = function(err, val) {
+    if (err) {
+      res.send("register failed");
+      console.error(val);
+    } else {
+      res.send('signed up');
+    }
+  };
+  onSignUp(req.body.username, req.body.password, req.body.email, cb);
 });
 
 // TODO: what will emails and receivers of emails be called/look like in terms of requests?
@@ -143,9 +149,13 @@ app.post('/sendMessage', function(req, res) {
 });
 
 app.get('/logout', function(req, res) {
-  onLogoutAttempt(req.body.username);
+  onLogoutAttempt();
 });
 
 var server = app.listen(5000, function () {
   console.log("Server listening at http://localhost:5000");
+});
+
+app.get('/getMessages', function(req, res) {
+  onGetMessages();
 });
