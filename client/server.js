@@ -170,19 +170,12 @@ function onSentMessage(receiver, sub, content, cb) {
 
   var encryptedText = createdCypher.update(content);
 
-  // 7. send encrypted message, hash, and cypher to recipient
-  var encryptedContentPackage = {
-    encryptedMessage: encryptedText,
-    hash: dummyHash,
-    cypher: dummyCypher
-  }
-
-  var secureContent = crypt
   var params = {
     receiver: receiver,
     subject: sub,
-    prime: 67, // TODO: remove
-    content: encryptedContentPackage
+    hash: dummyHash,
+    cypher: dummyCypher,
+    content: encryptedText
   };
   callServer(sentMessageOptions, params, cb);
 };
@@ -192,7 +185,7 @@ app.get('/getMessages', function(req, res) {
   var cb = function(err, val) {
     if (err) {
       console.log('failed to retrieve messages: ' + val.toSring());
-      res.send(val);
+      res.send(val);np
     } else {
       console.log('messages retrieved');
       res.send(val);
