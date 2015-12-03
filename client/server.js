@@ -5,6 +5,7 @@ var path = require('path');
 var https = require('https');
 var bodyParser = require('body-parser');
 var fs = require('fs');
+var querystring = require('querystring');
 const HOST = '107.170.176.250';
 // var cookies = require('cookies');
 var crypto = require('crypto');
@@ -12,6 +13,7 @@ var loginPage = "IronMail.html";
 
 var inbox = '';
 var keyExchangeObject = crypto.getDiffieHellman('modp14');
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 const DUMMYPRIVATEKEY = "E9 87 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
 const DUMMYPUBLICKEY = "E9 69 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
@@ -61,17 +63,19 @@ app.use(bodyParser.json());
 // app.use(cors());
 
 // all calls to server sent through this function
-function callServer(options, data, cb) {
+function callServer(options, params, cb) {
+  var postData = querystring.stringify(params);
+
   options.headers = {
     'Content-Type': 'application/json',
-    'Content-Length': data.length
+    'Content-Length': Buffer.byteLength(postData)
   };
 
   var req = https.request(options, function(res) {
     res.on('data', function(data) {
       // if the status code is not 200, there was an error
       var error = res.statusCode !== 200;
-      cb(error, data);
+      cb(error, data.toString());
     });
   });
 
@@ -80,7 +84,7 @@ function callServer(options, data, cb) {
     cb(true, e);
   });
 
-  req.write(data);
+  req.write(postData);
   req.end();
 };
 
@@ -132,7 +136,7 @@ app.post('/logIn', function(req, res) {
 function onLoginAttempt(username, password, cb) {
   var params = {
     username: username,
-    pasasword: password
+    password: password
   };
   callServer(loginOptions, params, cb);
 }

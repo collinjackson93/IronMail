@@ -70,7 +70,6 @@ app.post('/sendMessage', function(req, res) {
 
 // TODO: ensure that user is logged in
 app.get('/getMessages', function(req, res) {
-  res.status(500).send('Not implemented yet');
   messages.get(req.session.username, function(err, response) {
     if (err) {
       res.status(500).send(response);
