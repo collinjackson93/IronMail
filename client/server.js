@@ -141,7 +141,7 @@ function onSentMessage(receiver, sub, content, cb) {
     prime: aPrime,
     content: secureContent
   };
-  callServer(sendMailOptions, params, cb);
+  callServer(sentMessageOptions, params, cb);
 }
 
 // ***RETRIEVE MESSAGES***
