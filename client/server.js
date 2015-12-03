@@ -67,7 +67,7 @@ function callServer(options, params, cb) {
   var postData = querystring.stringify(params);
 
   options.headers = {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/x-www-form-urlencoded',
     'Content-Length': Buffer.byteLength(postData)
   };
 
@@ -75,6 +75,9 @@ function callServer(options, params, cb) {
     res.on('data', function(data) {
       // if the status code is not 200, there was an error
       var error = res.statusCode !== 200;
+      if (error) {
+        console.error(res.statusCode);
+      }
       cb(error, data.toString());
     });
   });
