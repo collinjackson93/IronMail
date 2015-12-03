@@ -9,98 +9,76 @@ var $ = require("jquery");
 var publicKey = "";
 var privateKey = "";
 
-/* AJAX request function that requires response
- CITATION: GOT THIS FROM CODE I WROTE PREVIOUSLY FOR the ORACLEOFOMAHA assignment */
-function getPageWithCallback(url, callback) {
-    var httpRequest = new XMLHttpRequest();
-    httpRequest.onreadystatechange = function() {
-        if (httpRequest.readyState == 4 && httpRequest.status == 200)
-            callback(httpRequest.responseText);
-    }
-
-    httpRequest.open("GET", url, true);
-    httpRequest.send(null);
-}
-
-//invokes sign up logic on server
-function signUpForIronMail(firstname, lastname, email, id, passwd, passwdconfirm){
-    /* First check that passwords match */
-    if(passwd.value!==passwdconfirm.value){
-        d3.select("#signupPASSWORD").property("value", function(){
+function signUp(userid, email, password, passwordconfirm){
+    alert('hello');
+    /* First check that passwords match */ 
+    if(password.value!==passwordconfirm.value) {
+        d3.select("#signupPASSWORD").property("value", function () {
             return "";
         });
-        d3.select("#signupPASSWORDCONFIRM").property("value", function(){
+        d3.select("#signupPASSWORDCONFIRM").property("value", function () {
             return "";
         });
         alert('password does not match');
-        return; //wipe fields and return if no match
+        return;
     }
-
-    var response = "valid";
-    getPageWithCallback('/addNewUser?firstname=' + firstname +
-        '&lastname=' + lastname +
-        '&email=' + email +
-        '&id=' + id +
-        '&passwd=' + passwd, function(response){
-        if(response === "!!!invalid!!!"){
-            d3.select("#signupUSERID").property("value", function(){
-                return "";
-            });
-            d3.select("#signupPASSWORD").property("value", function(){
-                return "";
-            });
-            d3.select("#signupPASSWORDCONFIRM").property("value", function(){
-                return "";
-            });
-            alert('that username is not available, try another');
-        }
-        else{
-            var lefttab = d3.select("#lefttab");
-            var righttab = d3.select('#righttab');
-            var corner = d3.select('#upperrightcorner');
-
-            //wipe the login screens, prepare to load emails
-            lefttab.selectAll('div').remove();
-            righttab.selectAll('div').remove();
-            corner.selectAll('div').remove();
-
-            var newdiv = corner.append('div').attr("class", "centered");
-            newdiv.append('button').attr('text', "hello");
-        }
-
-    });
+    else{
+        whoIsLoggedInID = userid;
+        wipeLoginScreens();
+    }
 }
 
-//invokes log in on server
-function logInToIronMail(username, password){
-
-    getPageWithCallback('/logIn?username=' + username + '&password=' + password, function(response){
-
-        alert(response);
-
-    })
+function logIn(username, password){
+    whoIsLoggedInID = username;
+    console.log("logged in");
 }
 
-//invokes log out on server, then wipes html of sensitive data
-function logOutOfIronMail(){
-    getPageWithCallback('/logOut', function(response){
-        whoIsLoggedInID = "";
-        areWeLoggedIn = false;
-        logOut();
-    });
-}
-
-//wipes webpage
 function logOut(){
-    console.log('clear web page');
+
 }
 
-function publicPrivateKeypair(){
-    getPageWithCallback('/publicPrivateKeyGen', function(response){
-        publicKey = response["public"];
-        privateKey =
-            alert(publicKey);
-        d3.select("#righttab").selectAll('div').remove();
-        d3.select('#righttab').append('p').text(publicKey);
-    });
+function loadEmails(){
+
+}
+
+function wipeLoginScreens(){
+    var lefttab = d3.select("#lefttab"); 
+    var righttab = d3.select('#righttab'); 
+    var corner = d3.select('#upperrightcorner');  
+
+    //wipe the login screens, prepare to load emails 
+    lefttab.selectAll('div').remove(); 
+    lefttab.selectAll('quote').remove();
+    lefttab.selectAll('input').remove();
+    lefttab.selectAll('button').remove();
+
+    lefttab.style("background-color", "green").style("overflow-y", "auto");
+
+    righttab.selectAll('div').remove(); 
+    righttab.style("background-color", "lightgreen");
+
+    var menubar = righttab.append('div').
+        style("background-color", "red").
+        style("padding", "10px").
+        style("height", "10vh").
+        style("width", "100%").
+        style("box-sizing", "border-box");
+
+    menubar.append('button').text('Encrypt and Send').style('display', 'inline').style('height', '100%').style('width', '20%');
+    menubar.append('button').text('Discard').style('display', 'inline').style('height', '100%').style('width', '20%');
+    menubar.append('button').text('Forward').style('display', 'inline').style('height', '100%').style('width', '20%');
+    menubar.append('button').text('Add BCC').style('display', 'inline').style('height', '100%').style('width', '20%');
+    menubar.append('button').text('Send Unencrypted').style('display', 'inline').
+        style('height', '100%').style('width', '20%').style('background-color', 'green');
+
+
+    var emailarea = righttab.append('textarea').
+        style("padding", "10px").
+        style("height", "60vh").
+        style("width", "100%").
+        style("box-sizing", "border-box");
+
+    var upperRightCornerText = d3.select("#upperrightcornertext").text("Hello, " + whoIsLoggedInID + ": Log out here!");
+    corner.selectAll('input').remove();
+    d3.select("#logInBUTTON").text("Log Out");
 }
