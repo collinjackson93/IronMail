@@ -5,9 +5,10 @@ function send(params, sender, cb) {
   var message = new Message({
     sender: sender,
     receiver: params.receiver,
-    sharedPrime: params.prime,
     subject: params.subject,
-    content: params.content
+    content: params.content,
+    hash: params.hash,
+    cypher: params.cypher
   });
   message.save(function(err) {
     if (err) {
