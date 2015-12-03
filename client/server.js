@@ -15,6 +15,7 @@ var keyExchangeObject = crypto.getDiffieHellman('modp14');
 
 const DUMMYPRIVATEKEY = "E9 87 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
 const DUMMYPUBLICKEY = "E9 69 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
+
 var server = app.listen(5000, function () {
   console.log("Server listening at http://localhost:5000");
 });
@@ -222,13 +223,22 @@ app.post('/openMessage', function(req, res) {
 });
 
 // ***GET USER's PUBLIC KEY***
-
 function getPublicKeyOf(user) {
+  var keyValue = -1;
+  var cb = function(err, val) {
+    if (!err) {
+      keyValue = val;
+    } else {
+      keyValue = null;
+    }
+  }
   callServer(userListOptions, user, cb);
-
-
+  if (keyValue == -1) {
+    return 'synchronizing issue';
+  } else {
+    return keyValue;
+  }
 }
-
 
 
 // ***LOGOUT***
@@ -250,4 +260,11 @@ function onLogoutAttempt(cb) {
 
 
 
-
+// ***REMOVE THIS FUNCTION LATER***
+app.get('/publicPrivateKeyGen', function(req, res) {
+  var keys = {
+    public: DUMMYPUBLICKEY,
+    private: DUMMYPRIVATEKEY
+  }
+  res.send(keys);
+});
