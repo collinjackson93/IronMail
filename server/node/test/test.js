@@ -189,8 +189,11 @@ describe('Messages', function() {
     });
   });
 
+  var timeEstimate;
   it('should save a properly formatted message', function(done) {
     messages.send({receiver: 'u2', prime: 13, subject: 'Testing', content: 'Secret'}, 'u1', function(err, response) {
+      // create a timestamp to compare against later
+      timeEstimate = Date.now();
       err.should.be.false;
       response.should.equal('Message sent');
       done();
@@ -210,12 +213,16 @@ describe('Messages', function() {
       // err.should.be.false;
       response.should.have.length(1);
       var retrievedMessage = response[0];
-      retrievedMessage.should.have.keys('_id', 'sender', 'receiver', 'sharedPrime', 'subject', 'content');
+      retrievedMessage.should.have.keys('_id', 'sender', 'receiver', 'sharedPrime', 'subject', 'content', 'timestamp');
       retrievedMessage.sender.should.equal('u1');
       retrievedMessage.receiver.should.equal('u2');
       retrievedMessage.sharedPrime.should.equal(13);
       retrievedMessage.subject.should.equal('Testing');
       retrievedMessage.content.should.equal('Secret');
+      // compare the saved timestamp to the one we created earlier with
+      // an error margin of half a second (500 milliseconds)
+      var returnedTimestamp = new Date(retrievedMessage.timestamp).getTime();
+      returnedTimestamp.should.be.closeTo(timeEstimate, 500);
       done();
     });
   });
