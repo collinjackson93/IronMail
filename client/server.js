@@ -1,7 +1,6 @@
 var express = require('express');
 var app = express();
 var path = require('path');
-// var cors = require('cors');
 var https = require('https');
 var bodyParser = require('body-parser');
 var fs = require('fs');
@@ -60,7 +59,6 @@ const userListOptions = {
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
-// app.use(cors());
 
 // all calls to server sent through this function
 function callServer(options, params, cb) {
