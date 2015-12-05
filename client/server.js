@@ -1,58 +1,50 @@
 var express = require('express');
 var app = express();
 var path = require('path');
-var https = require('https');
 var bodyParser = require('body-parser');
 var fs = require('fs');
-var querystring = require('querystring');
-const HOST = '107.170.176.250';
-// var cookies = require('cookies');
+// set defaults to use cookies and allow self-signed SSL certs
+var request = require('request').defaults({jar: true, strictSSL: false});
 var crypto = require('crypto');
-var loginPage = "IronMail.html";
-
-var inbox = '';
-var keyExchangeObject = crypto.getDiffieHellman('modp14');
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
-const DUMMYPRIVATEKEY = "E9 87 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
-const DUMMYPUBLICKEY = "E9 69 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
 
 var server = app.listen(5000, function () {
   console.log("Server listening at http://localhost:5000");
 });
 
+var loginPage = "IronMail.html";
+var inbox = '';
+var keyExchangeObject = crypto.getDiffieHellman('modp14');
+
+const DUMMYPRIVATEKEY = "E9 87 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
+const DUMMYPUBLICKEY = "E9 69 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
+
+const HOST = 'https://107.170.176.250';
 const loginOptions = {
-  hostname: HOST,
   path: '/login',
   method: 'POST'
 };
 
 const registerOptions = {
-  hostname: HOST,
   path: '/register',
   method: 'POST'
 };
 
 const logoutOptions = {
-  hostname: HOST,
   path: '/logout',
   method: 'GET'
 };
 
 const sentMessageOptions = {
-  hostname: HOST,
   path: '/sendMessage',
   method: 'POST'
 };
 
 const getMessagesOptions = {
-  hostname: HOST,
   path: '/getMessages',
   method: 'GET'
 };
 
 const userListOptions = {
-  hostname: HOST,
   path: '/user',
   method: 'POST'
 };
@@ -62,32 +54,13 @@ app.use(bodyParser.json());
 
 // all calls to server sent through this function
 function callServer(options, params, cb) {
-  var postData = querystring.stringify(params);
-
-  options.headers = {
-    'Content-Type': 'application/x-www-form-urlencoded',
-    'Content-Length': Buffer.byteLength(postData)
-  };
-
-  var req = https.request(options, function(res) {
-    res.on('data', function(data) {
-      // if the status code is not 200, there was an error
-      var error = res.statusCode !== 200;
-      if (error) {
-        console.error(res.statusCode);
-      }
-      cb(error, data.toString());
-    });
-  });
-
-  req.on('error', function(e) {
-    console.error(e);
-    cb(true, e);
-  });
-
-  req.write(postData);
-  req.end();
-};
+  request({
+    url: HOST + options.path,
+    method: options.method,
+    json: params
+  },
+  cb);
+}
 
 // sends webpage initially
 app.get('/', function (req, res) {
@@ -100,7 +73,7 @@ app.post('/addNewUser', function(req, res) {
   var pubKey = keyExchangeObject.generateKeys('hex');
   var privKey = keyExchangeObject.getPrivateKey('hex');
 
-  var cb = function(err, val) {
+  var cb = function(err, response, val) {
     if (err) {
       res.send("register failed");
       console.error(val);
@@ -124,7 +97,7 @@ function onSignUp(user, pass, email, pKey, cb) {
 
 // ***LOGIN***
 app.post('/logIn', function(req, res) {
-  var cb = function(err, val) {
+  var cb = function(err, response, val) {
     if (err) {
       res.send('login failed');
       console.error(val);
@@ -145,7 +118,7 @@ function onLoginAttempt(username, password, cb) {
 // ***SEND EMAIL***
 // TODO: remove prime number from params to cloud
 app.post('/sendMessage', function(req, res) {
-  var cb = function(err, val) {
+  var cb = function(err, response, val) {
     if (err) {
       res.send(val);
     } else {
@@ -187,7 +160,7 @@ function onSentMessage(receiver, sub, content, cb) {
 
 // ***RETRIEVE MESSAGES***
 app.get('/getMessages', function(req, res) {
-  var cb = function(err, val) {
+  var cb = function(err, response, val) {
     if (err) {
       console.log('failed to retrieve messages: ' + val.toSring());
       res.send(val);np
@@ -223,7 +196,7 @@ app.post('/openMessage', function(req, res) {
 // ***GET USER's PUBLIC KEY***
 function getPublicKeyOf(user) {
   var keyValue = -1;
-  var cb = function(err, val) {
+  var cb = function(err, response, val) {
     if (!err) {
       keyValue = val;
     } else {
@@ -241,7 +214,7 @@ function getPublicKeyOf(user) {
 
 // ***LOGOUT***
 app.get('/logout', function(req, res) {
-  var cb = function(err, val) {
+  var cb = function(err, response, val) {
     if (err) {
       res.send('logout failed');
       console.error(val);
