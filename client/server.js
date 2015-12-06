@@ -82,7 +82,7 @@ app.post('/addNewUser', function(req, res) {
       console.error(val);
     } else {
       console.log('signed up');
-      res.send('privKey');
+      res.send(true);
     }
   };
 
@@ -101,7 +101,16 @@ function onSignUp(user, pass, email, pKey, cb) {
 function storePrivateKeyLocally(key) {
   fs.acess(fileName, fs.W_OK, function(error) {
     console.log(error ? 'cannot access pKey.txt' : 'got access to write private key');
-      
+      if (!error) {
+        //var fd = fs.createWriteStream(fileName, options);
+        fs.writeFile(fileName, key, null, function(error) {
+          if (error) {
+            console.log('private key not stored properly')
+          } else {
+            console.log('private key stored!')
+          }
+        });
+      }
   });
 }
 
