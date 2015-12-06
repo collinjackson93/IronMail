@@ -13,11 +13,15 @@ var server = app.listen(5000, function () {
 
 var loginPage = "IronMail.html";
 var fileName = "pk.txt";
-var inbox = '';
+var inbox = {};
 var keyExchangeObject = crypto.getDiffieHellman('modp14');
 
 const DUMMYPRIVATEKEY = "E9 87 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
 const DUMMYPUBLICKEY = "E9 69 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
+const DUMMYHASH = "lolol789";
+const DUMMYCYPHER = "hahaha567";
+
+var privateKey = null;
 
 const HOST = 'https://107.170.176.250';
 const loginOptions = {
@@ -88,12 +92,12 @@ app.post('/addNewUser', function(req, res) {
 
   onSignUp(req.body.username, req.body.password, req.body.email, pubKey, cb);
 });
-function onSignUp(user, pass, email, pKey, cb) {
+function onSignUp(user, pass, email, key, cb) {
   var params = {
     username: user,
     password: pass,
     email: email,
-    publicKey: pKey
+    publicKey: key
   };
   callServer(registerOptions, params, cb);
 }
@@ -134,6 +138,9 @@ function onLoginAttempt(username, password, cb) {
   callServer(loginOptions, params, cb);
 }
 
+
+
+// ****** OUTDATED ********
 // ***SEND EMAIL***
 // TODO: remove prime number from params to cloud
 app.post('/sendMessage', function(req, res) {
@@ -154,24 +161,23 @@ function onSentMessage(receiver, sub, content, cb) {
   //var recipientPublicKey = getPublicKeyOf(receiver);
   var localRecipientKey = DUMMYPUBLICKEY;
 
-  // 3. generate a "shared secret"
-  var sharedSecret = keyExchangeObject.computeSecret(localRecipientKey, null, 'hex');
-  // 4. generate hash
-  var dummyHash = "lolol789";
-  // 5. generate cypher
-  var dummyCypher = "hahaha567";
+  // 3. initialize DH object with a random prime of length 512
+  var dhObject = crypto.createDiffieHellman(512);
+  dhObject.setPrivateKey(DUMMYPRIVATEKEY, 'hex');
 
-  // 6. encrypt message using shared secret, hash and cypher
-  var hashedSecret = crypto.createHash(dummyHash).update(keyExchangeObject).digest("binary");
-  var createdCypher = crypto.createCypher(dummyCypher, hashedSecret, crypto.randomBytes(128));
+ // 4. generate shared secret, interpreting the string localRecipientKey using hex encoding
+  var sharedSecret = dhObject.computeSecret(localRecipientKey, 'hex', 'hex');
+
+  // 5. encrypt message using shared secret, hash and cypher
+  var hashedSecret = crypto.createHash(DUMMYHASH).update(sharedSecret).digest("binary");
+  var createdCypher = crypto.createCypher(DUMMYCYPHER, hashedSecret, crypto.randomBytes(128));
 
   var encryptedText = createdCypher.update(content);
 
   var params = {
     receiver: receiver,
     subject: sub,
-    hash: dummyHash,
-    cypher: dummyCypher,
+    prime: dhObject.getPrime(),
     content: encryptedText
   };
   callServer(sentMessageOptions, params, cb);
@@ -182,13 +188,17 @@ app.get('/getMessages', function(req, res) {
   var cb = function(err, response, val) {
     if (err) {
       console.log('failed to retrieve messages: ' + val.toSring());
-      res.send(val);np
+      res.send(val);
     } else {
       console.log('messages retrieved');
       res.send(val);
-      inbox = val;
+      
+      // iterate through array, creating a map for faster lookup later
+      for (var i = 0; i < val.length; ++i) {
+        inbox[val[0]._id] = val[0];
+      }
     }
-  }
+  };
   retrieveMessages(cb);
 });
 function retrieveMessages(cb) {
@@ -198,17 +208,25 @@ function retrieveMessages(cb) {
 
 // ***OPEN MESSAGE***
 app.post('/openMessage', function(req, res) {
+  var messageID = req.body._id;
+  var message = inbox[messageID];
+
   // 1. get sender's public key
   //var senderPublicKey = getPublicKeyOf(req.body.sender);
   var senderPublicKey = DUMMYPUBLICKEY;
-  // 2. compute shared secret
-  var sharedSecret = keyExchangeObject.computeSecret(senderPublicKey, null, "hex");
+  
+  // 2. generate DH object with prime that was originally used
+  var dhObject = crypto.createDiffieHellman(message.sharedPrime);
+  dhObject.setPrivateKey(DUMMYPRIVATEKEY, 'hex');
 
-  // 3. construct symmetric block cypher
-  var hashedSecret = crypto.createHash(req.body.content.hash).update(sharedSecret).digest("binary");
-  var decipherObject = crypto.createDecipher(req.body.content.cypher, hashedSecret);
+  // 3. generate shared secret, interpreting the string localRecipientKey using hex encoding
+  var sharedSecret = dhObject.computeSecret(senderPublicKey, 'hex', 'hex');
 
-  var decipheredMessage = decipherObject.update(req.body.content.encryptedMessage);
+  // 4. construct symmetric block cypher
+  var hashedSecret = crypto.createHash(DUMMYHASH).update(sharedSecret).digest("binary");
+  var decipherObject = crypto.createDecipher(DUMMYCYPHER, hashedSecret);
+
+  var decipheredMessage = decipherObject.update(req.body.content);
   res.send(decipheredMessage);
 });
 
