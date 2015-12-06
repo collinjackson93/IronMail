@@ -142,7 +142,6 @@ function onLoginAttempt(username, password, cb) {
 
 // ****** OUTDATED ********
 // ***SEND EMAIL***
-// TODO: remove prime number from params to cloud
 app.post('/sendMessage', function(req, res) {
   var cb = function(err, response, val) {
     if (err) {
