@@ -77,7 +77,7 @@ app.get('/', function (req, res) {
 app.post('/addNewUser', function(req, res) {
   var pubKey = keyExchangeObject.generateKeys('hex');
   var privKey = keyExchangeObject.getPrivateKey('hex');
-  
+
   storePrivateKeyLocally(privKey);
 
   var cb = function(err, response, val) {
@@ -177,7 +177,7 @@ function onSentMessage(receiver, sub, content, cb) {
   var params = {
     receiver: receiver,
     subject: sub,
-    prime: dhObject.getPrime(),
+    sharedPrime: dhObject.getPrime(),
     content: encryptedText
   };
   callServer(sentMessageOptions, params, cb);
@@ -191,8 +191,8 @@ app.get('/getMessages', function(req, res) {
       res.send(val);
     } else {
       console.log('messages retrieved');
-      res.send(val);
-      
+      res.json(val);
+
       // iterate through array, creating a map for faster lookup later
       for (var i = 0; i < val.length; ++i) {
         inbox[val[0]._id] = val[0];
@@ -214,7 +214,7 @@ app.post('/openMessage', function(req, res) {
   // 1. get sender's public key
   //var senderPublicKey = getPublicKeyOf(req.body.sender);
   var senderPublicKey = DUMMYPUBLICKEY;
-  
+
   // 2. generate DH object with prime that was originally used
   var dhObject = crypto.createDiffieHellman(message.sharedPrime);
   dhObject.setPrivateKey(DUMMYPRIVATEKEY, 'hex');
