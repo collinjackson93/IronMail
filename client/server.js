@@ -12,6 +12,7 @@ var server = app.listen(5000, function () {
 });
 
 var loginPage = "IronMail.html";
+var fileName = "pk.txt";
 var inbox = '';
 var keyExchangeObject = crypto.getDiffieHellman('modp14');
 
@@ -72,6 +73,8 @@ app.get('/', function (req, res) {
 app.post('/addNewUser', function(req, res) {
   var pubKey = keyExchangeObject.generateKeys('hex');
   var privKey = keyExchangeObject.getPrivateKey('hex');
+  
+  storePrivateKeyLocally(privKey);
 
   var cb = function(err, response, val) {
     if (err) {
@@ -93,6 +96,13 @@ function onSignUp(user, pass, email, pKey, cb) {
     publicKey: pKey
   };
   callServer(registerOptions, params, cb);
+}
+
+function storePrivateKeyLocally(key) {
+  fs.acess(fileName, fs.W_OK, function(error) {
+    console.log(error ? 'cannot access pKey.txt' : 'got access to write private key');
+      
+  });
 }
 
 // ***LOGIN***
@@ -210,7 +220,6 @@ function getPublicKeyOf(user) {
     return keyValue;
   }
 }
-
 
 // ***LOGOUT***
 app.get('/logout', function(req, res) {
