@@ -8,13 +8,14 @@ var request = require('request').defaults({jar: true, strictSSL: false});
 var crypto = require('crypto');
 
 var server = app.listen(5000, function () {
-  console.log("Server listening at http://localhost:5000");
+  console.log("Server listening at https://localhost:5000");
 });
 
 var loginPage = "IronMail.html";
 var fileName = "pk.txt";
 var inbox = {};
 var keyExchangeObject = crypto.getDiffieHellman('modp14');
+var users = {};
 
 const DUMMYPRIVATEKEY = "E9 87 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
 const DUMMYPUBLICKEY = "E9 69 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
@@ -229,7 +230,7 @@ app.post('/openMessage', function(req, res) {
   res.send(decipheredMessage);
 });
 
-// ***GET USER's PUBLIC KEY***
+// ***GET USER's KEYS***
 function getPublicKeyOf(user) {
   var keyValue = -1;
   var cb = function(err, response, val) {
@@ -246,6 +247,18 @@ function getPublicKeyOf(user) {
     return keyValue;
   }
 }
+function getPrivateKey() {
+  var privateKey = fs.readFile(fileName, function(error, data) {
+    if (error) {
+      console.log('private key not found');
+      throw new Error;
+      } else {
+        console.log('private key found');
+        return data;
+      }
+  })
+  return privateKey;
+};
 
 // ***LOGOUT***
 app.get('/logout', function(req, res) {
