@@ -11,16 +11,16 @@ var server = app.listen(5000, function () {
   console.log("Server listening at https://localhost:5000");
 });
 
-var loginPage = "IronMail.html";
-var fileName = "pk.txt";
+const LOGINPAGE = "IronMail.html";
+const FILENAME = "pk.txt";
 var inbox = {};
 var keyExchangeObject = crypto.getDiffieHellman('modp14');
 var users = {};
 
 const DUMMYPRIVATEKEY = "E9 87 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
 const DUMMYPUBLICKEY = "E9 69 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
-const DUMMYHASH = "lolol789";
-const DUMMYCYPHER = "hahaha567";
+const CYPHER = "aes-256-ctr";
+const HASH = "sha256";
 
 var privateKey = null;
 
@@ -104,15 +104,14 @@ function onSignUp(user, pass, email, key, cb) {
 }
 
 function storePrivateKeyLocally(key) {
-  fs.acess(fileName, fs.W_OK, function(error) {
+  fs.acess(FILENAME, fs.W_OK, function(error) {
     console.log(error ? 'cannot access pKey.txt' : 'got access to write private key');
       if (!error) {
-        //var fd = fs.createWriteStream(fileName, options);
-        fs.writeFile(fileName, key, null, function(error) {
+        fs.writeFile(FILENAME, key, null, function(error) {
           if (error) {
-            console.log('private key not stored properly')
+            console.error('private key not stored properly');
           } else {
-            console.log('private key stored!')
+            console.log('private key stored!');
           }
         });
       }
@@ -169,8 +168,8 @@ function onSentMessage(receiver, sub, content, cb) {
   var sharedSecret = dhObject.computeSecret(localRecipientKey, 'hex', 'hex');
 
   // 5. encrypt message using shared secret, hash and cypher
-  var hashedSecret = crypto.createHash(DUMMYHASH).update(sharedSecret).digest("binary");
-  var createdCypher = crypto.createCypher(DUMMYCYPHER, hashedSecret, crypto.randomBytes(128));
+  var hashedSecret = crypto.createHash(HASH).update(sharedSecret).digest("binary");
+  var createdCypher = crypto.createCypher(CYPHER, hashedSecret, crypto.randomBytes(128));
 
   var encryptedText = createdCypher.update(content);
 
@@ -223,8 +222,8 @@ app.post('/openMessage', function(req, res) {
   var sharedSecret = dhObject.computeSecret(senderPublicKey, 'hex', 'hex');
 
   // 4. construct symmetric block cypher
-  var hashedSecret = crypto.createHash(DUMMYHASH).update(sharedSecret).digest("binary");
-  var decipherObject = crypto.createDecipher(DUMMYCYPHER, hashedSecret);
+  var hashedSecret = crypto.createHash(HASH).update(sharedSecret).digest("binary");
+  var decipherObject = crypto.createDecipher(CYPHER, hashedSecret);
 
   var decipheredMessage = decipherObject.update(req.body.content);
   res.send(decipheredMessage);
@@ -248,7 +247,7 @@ function getPublicKeyOf(user) {
   }
 }
 function getPrivateKey() {
-  var privateKey = fs.readFile(fileName, function(error, data) {
+  var privateKey = fs.readFile(FILENAME, function(error, data) {
     if (error) {
       console.log('private key not found');
       throw new Error;
