@@ -5,7 +5,7 @@ var User = require('./userModel');
 var messageSchema = new Schema({
   sender: { type: String, required: true, validate: validUser },
   receiver: { type: String, required: true, validate: validUser },
-  sharedPrime: { type: Number, required: true },
+  sharedPrime: { type: String, required: true },
   subject: { type: String, required: true },
   content: { type: String, required: true },
   timestamp: { type: Date, default: Date.now }

@@ -168,18 +168,19 @@ function onSentMessage(receiver, sub, content, cb) {
     var sharedSecret = dhObject.computeSecret(recipientPublicKey, 'hex', 'hex');
 
     // 5. encrypt message using shared secret, hash and cipher
-    console.log('creating hash');
-    var hashedSecret = crypto.createHash(HASH).update(sharedSecret).digest("binary");
+    // console.log('creating hash');
+    // var hashedSecret = crypto.createHash(HASH).update(sharedSecret).digest("binary");
     console.log('creating cipher');
-    var createdCipheriv = crypto.createCipheriv(CIPHER, hashedSecret, crypto.randomBytes(512));
+    // var createdCipher = crypto.createCipheriv(CIPHER, hashedSecret, crypto.randomBytes(512));
+    var createdCipher = crypto.createCipher(CIPHER, sharedSecret);
 
     console.log('encrypting text');
-    var encryptedText = createdCypher.update(content);
+    var encryptedText = createdCipher.update(content, 'utf8', 'hex');
 
     var params = {
       receiver: receiver,
       subject: sub,
-      sharedPrime: dhObject.getPrime(),
+      prime: dhObject.getPrime('hex'),
       content: encryptedText
     };
     console.log('calling server');
@@ -219,7 +220,7 @@ app.post('/openMessage', function(req, res) {
   //var senderPublicKey = getPublicKeyOf(req.body.sender);
   getPublicKeyOf(message.sender, function(senderPublicKey) {
     // 2. generate DH object with prime that was originally used
-    var dhObject = crypto.createDiffieHellman(message.sharedPrime);
+    var dhObject = crypto.createDiffieHellman(message.sharedPrime, 'hex');
     dhObject.setPrivateKey(getPrivateKey(), 'hex');
 
     // 3. generate shared secret, interpreting the string localRecipientKey using hex encoding

@@ -212,7 +212,7 @@ describe('Messages', function() {
       retrievedMessage.should.have.keys('_id', 'sender', 'receiver', 'sharedPrime', 'subject', 'content', 'timestamp');
       retrievedMessage.sender.should.equal('u1');
       retrievedMessage.receiver.should.equal('u2');
-      retrievedMessage.sharedPrime.should.equal(13);
+      retrievedMessage.sharedPrime.should.equal('13');
       retrievedMessage.subject.should.equal('Testing');
       retrievedMessage.content.should.equal('Secret');
       // compare the saved timestamp to the one we created earlier with
