@@ -53,6 +53,10 @@ const userListOptions = {
 };
 
 // TODO: delete message
+const deleteMessageOptions = {
+  path: '/deleteMessage',
+  method: 'Post'
+}
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
@@ -139,7 +143,6 @@ function onLoginAttempt(username, password, cb) {
 
 
 
-// ****** OUTDATED ********
 // ***SEND EMAIL***
 app.post('/sendMessage', function(req, res) {
   var cb = function(err, response, val) {
@@ -278,8 +281,23 @@ function onLogoutAttempt(cb) {
 }
 
 
+// ***DELETE***
+app.post('/deleteMessage', function(req, res) {
+  var cb = function(err, response, val) {
+    if (err || response.statusCode !== 200) {
+      res.send('failed to delete message');
+      console.error(val);
+    } else {
+      res.send('message deleted')
+    }
+  }
+  var params = {
+    _id: req.body._id
+  }
+  callServer(deleteMessageOptions, params, cb);
+})
 
-// ***REMOVE THIS FUNCTION LATER***
+// ***DEBUGGING***
 app.get('/publicPrivateKeyGen', function(req, res) {
   getPublicKeyOf('u4', function(publicKey) {
     var keys = {
