@@ -88,7 +88,6 @@ app.get('/getMessages', function(req, res) {
   }
 });
 
-// TODO: add delete message
 app.post('/deleteMessage', function(req, res) {
   if (!req.session.username) {
     res.status(403).send('Not currently logged in');
@@ -104,7 +103,20 @@ app.post('/deleteMessage', function(req, res) {
     });
   }
 });
-// TODO: add delete user
+
+app.post('/deleteUser', function(req, res) {
+  if (req.body.auth.username === 'admin' && req.body.auth.password === 'pass') {
+    users.delete(req.body.username, function(err, doc) {
+      if (err) {
+        res.status(500).send(err.toString());
+      } else if (!doc){
+        res.status(400).send('Could not find user');
+      } else {
+        res.send('Deleted user');
+      }
+    });
+  }
+});
 
 var server = app.listen(3000, function () {
   var port = server.address().port;
