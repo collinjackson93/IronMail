@@ -104,9 +104,9 @@ function onSignUp(user, pass, email, key, cb) {
 }
 
 function storePrivateKeyLocally(key) {
-  fs.acess(FILENAME, fs.W_OK, function(error) {
+  /*fs.acess(FILENAME, fs.W_OK, function(error) {
     console.log(error ? 'cannot access pKey.txt' : 'got access to write private key');
-      if (!error) {
+      if (!error) {*/
         fs.writeFile(FILENAME, key, null, function(error) {
           if (error) {
             console.error('private key not stored properly');
@@ -114,8 +114,8 @@ function storePrivateKeyLocally(key) {
             console.log('private key stored!');
           }
         });
-      }
-  });
+      /*}
+  });*/
 }
 
 // ***LOGIN***
