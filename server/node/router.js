@@ -79,7 +79,8 @@ app.get('/getMessages', function(req, res) {
   })
 });
 
-// TODO: add delete
+// TODO: add delete message
+// TODO: add delete user
 
 var server = app.listen(3000, function () {
   var port = server.address().port;

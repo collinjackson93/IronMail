@@ -157,7 +157,7 @@ function onSentMessage(receiver, sub, content, cb) {
 
   // 2. get intended recipient's public key
   getPublicKeyOf(receiver, function(recipientPublicKey) {
-    // 3. initialize DH object with a random prime of length 2048
+    // 3. initialize DH object with a random prime of length 1024
     console.log('creating dhObject');
     var dhObject = crypto.createDiffieHellman(1024);
     console.log('setting private key');
@@ -197,7 +197,7 @@ app.get('/getMessages', function(req, res) {
 
       // iterate through array, creating a map for faster lookup later
       for (var i = 0; i < val.length; ++i) {
-        inbox[val[0]._id] = val[0];
+        inbox[val[i]._id] = val[i];
       }
     }
   };
