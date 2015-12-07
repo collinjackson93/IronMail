@@ -78,6 +78,7 @@ button:hover{
     padding: 5px;
     float: right;
     flex-grow: 1;
+    width: 60%;
 }
 
 .featuresList{
@@ -102,4 +103,8 @@ li{
 
 iframe{
     height: calc(50vh - 30px);
+}
+
+.none{
+    all: initial;
 }
