@@ -5,7 +5,6 @@ function send(params, sender, cb) {
   var message = new Message({
     sender: sender,
     receiver: params.receiver,
-    sharedPrime: params.prime,
     subject: params.subject,
     content: params.content
   });
