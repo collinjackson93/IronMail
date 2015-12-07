@@ -164,7 +164,6 @@ function onSentMessage(receiver, sub, content, cb) {
     var params = {
       receiver: receiver,
       subject: sub,
-      prime: 17,
       content: encryptedText
     };
     console.log('calling server');
