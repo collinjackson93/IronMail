@@ -23,7 +23,7 @@ function register(params, cb) {
   var user = new User({
     username: params.username,
     password: bcrypt.hashSync(params.password, SALT_WORK_FACTOR),
-    email: params.email,
+    // email: params.email,
     publicKey: params.publicKey
   });
   user.save(function(err) {

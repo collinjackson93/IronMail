@@ -7,7 +7,8 @@ var messageSchema = new Schema({
   receiver: { type: String, required: true, validate: validUser },
   sharedPrime: { type: Number, required: true },
   subject: { type: String, required: true },
-  content: { type: String, required: true }
+  content: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now }
 });
 
 // check that user exists in database

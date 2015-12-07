@@ -15,7 +15,7 @@
   - send: receiver, prime, subject, content
   - receive: sending status (success or failure reason)
 - /getMessages(GET):
-  - receive: list of message objects with \_id, sender, receiver, sharedPrime, subject, content(encrypted)
+  - receive: list of message objects with \_id, sender, receiver, sharedPrime, subject, content(encrypted), timestamp
 
 # Client-Server to UI
 - / (GET):
