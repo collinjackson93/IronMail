@@ -189,7 +189,7 @@ function onSentMessage(receiver, sub, content, cb) {
 app.get('/getMessages', function(req, res) {
   var cb = function(err, response, val) {
     if (err || response.statusCode !== 200) {
-      console.log('failed to retrieve messages: ' + val.toSring());
+      console.log('failed to retrieve messages: ' + val.toString());
       res.send(val);
     } else {
       console.log('messages retrieved');

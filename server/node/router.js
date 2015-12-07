@@ -89,6 +89,21 @@ app.get('/getMessages', function(req, res) {
 });
 
 // TODO: add delete message
+app.post('/deleteMessage', function(req, res) {
+  if (!req.session.username) {
+    res.status(403).send('Not currently logged in');
+  } else  {
+    messages.delete(req.body._id, req.session.username, function(err, doc) {
+      if (err) {
+        res.status(500).send(err.toString());
+      } else if (!doc){
+        res.status(400).send('Could not find message');
+      } else {
+        res.send('Deleted message');
+      }
+    });
+  }
+});
 // TODO: add delete user
 
 var server = app.listen(3000, function () {

@@ -204,12 +204,13 @@ describe('Messages', function() {
     });
   });
 
+  var messageID;
   it('should get all messages sent to a user', function(done) {
     messages.get('u2', function(err, response) {
-      // err.should.be.false;
       response.should.have.length(1);
       var retrievedMessage = response[0];
       retrievedMessage.should.have.keys('_id', 'sender', 'receiver', 'sharedPrime', 'subject', 'content', 'timestamp');
+      messageID = retrievedMessage._id;
       retrievedMessage.sender.should.equal('u1');
       retrievedMessage.receiver.should.equal('u2');
       retrievedMessage.sharedPrime.should.equal('13');
@@ -220,6 +221,25 @@ describe('Messages', function() {
       var returnedTimestamp = new Date(retrievedMessage.timestamp).getTime();
       returnedTimestamp.should.be.closeTo(timeEstimate, 500);
       done();
+    });
+  });
+
+  it('should only let the receiver of a message delete it', function(done) {
+    messages.delete(messageID, 'u1', function(err, doc) {
+      should.not.exist(err);
+      should.not.exist(doc);
+      done();
+    });
+  });
+
+  it('should delete a message', function(done) {
+    messages.delete(messageID, 'u2', function(err, doc) {
+      should.not.exist(err);
+      should.exist(doc);
+      messages.get('u2', function(err, response) {
+        response.should.have.length(0);
+        done();
+      });
     });
   });
 });

@@ -24,7 +24,12 @@ function get(receiver, cb) {
   });
 }
 
+function del(id, username, cb) {
+  Message.findOneAndRemove({'_id': id, 'receiver': username}, cb);
+}
+
 module.exports = {
   send: send,
-  get: get
+  get: get,
+  delete: del
 }
