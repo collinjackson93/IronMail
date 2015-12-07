@@ -4,7 +4,7 @@
   - send: username, password
   - receive: login status (success or failure)
 - /register(POST):
-  - send: email, username, password, public-key
+  - send: username, password, public-key
   - receive: registration status (success or failure with appropriate reason)
 - /user(POST):
   - send: username (partial name starting from beginning)
@@ -24,7 +24,7 @@
   - send: username, password
   - receive: login status (sucess or failure&why)
 - /addNewUser(POST):
-  - send: username, email, password
+  - send: username, password
   - receive registration status (success or failure&why), logic should end up being similar to login unless we want a "welcome new user" page or something
 - /getMessages(GET)
   - receive: list of message objects with \_id, sender, receiver, sharedPrime, subject, content (decrypted)

@@ -14,7 +14,6 @@ var server = app.listen(5000, function () {
 const LOGINPAGE = "IronMail.html";
 const FILENAME = "pk.txt";
 var inbox = {};
-var keyExchangeObject = crypto.getDiffieHellman('modp14');
 var users = {};
 
 const DUMMYPRIVATEKEY = "E9 87 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
@@ -76,13 +75,14 @@ app.get('/', function (req, res) {
 
 // ***REGISTRATION***
 app.post('/addNewUser', function(req, res) {
+  var keyExchangeObject = crypto.getDiffieHellman('modp14');
   var pubKey = keyExchangeObject.generateKeys('hex');
   var privKey = keyExchangeObject.getPrivateKey('hex');
 
   storePrivateKeyLocally(privKey);
 
   var cb = function(err, response, val) {
-    if (err) {
+    if (err || response.status !== 200) {
       res.send("register failed");
       console.error(val);
     } else {
@@ -91,13 +91,12 @@ app.post('/addNewUser', function(req, res) {
     }
   };
 
-  onSignUp(req.body.username, req.body.password, req.body.email, pubKey, cb);
+  onSignUp(req.body.username, req.body.password, pubKey, cb);
 });
-function onSignUp(user, pass, email, key, cb) {
+function onSignUp(user, pass, key, cb) {
   var params = {
     username: user,
     password: pass,
-    email: email,
     publicKey: key
   };
   callServer(registerOptions, params, cb);
@@ -121,7 +120,7 @@ function storePrivateKeyLocally(key) {
 // ***LOGIN***
 app.post('/logIn', function(req, res) {
   var cb = function(err, response, val) {
-    if (err) {
+    if (err || response.status !== 200) {
       res.send('login failed');
       console.error(val);
     } else {
@@ -144,7 +143,7 @@ function onLoginAttempt(username, password, cb) {
 // ***SEND EMAIL***
 app.post('/sendMessage', function(req, res) {
   var cb = function(err, response, val) {
-    if (err) {
+    if (err || response.status !== 200) {
       res.send(val);
     } else {
       res.send('email sent');
@@ -185,7 +184,7 @@ function onSentMessage(receiver, sub, content, cb) {
 // ***RETRIEVE MESSAGES***
 app.get('/getMessages', function(req, res) {
   var cb = function(err, response, val) {
-    if (err) {
+    if (err || response.status !== 200) {
       console.log('failed to retrieve messages: ' + val.toSring());
       res.send(val);
     } else {
@@ -233,10 +232,10 @@ app.post('/openMessage', function(req, res) {
 function getPublicKeyOf(user) {
   var keyValue = -1;
   var cb = function(err, response, val) {
-    if (!err) {
-      keyValue = val;
-    } else {
+    if (err || response.status !== 200) {
       keyValue = null;
+    } else {
+      keyValue = val;
     }
   }
   callServer(userListOptions, user, cb);
@@ -262,7 +261,7 @@ function getPrivateKey() {
 // ***LOGOUT***
 app.get('/logout', function(req, res) {
   var cb = function(err, response, val) {
-    if (err) {
+    if (err || response.status !== 200) {
       res.send('logout failed');
       console.error(val);
     } else {
