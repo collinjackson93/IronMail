@@ -16,6 +16,9 @@
   - receive: sending status (success or failure reason)
 - /getMessages(GET):
   - receive: list of message objects with \_id, sender, receiver, sharedPrime, subject, content(encrypted), timestamp
+- /deleteMessage(POST):
+  - send: \_id
+  - receive: 'Deleted message' upon success or message with error
 
 # Client-Server to UI
 - / (GET):

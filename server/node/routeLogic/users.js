@@ -42,6 +42,10 @@ function list(params, cb) {
   });
 }
 
+function del(username, cb) {
+  User.findOneAndRemove({'username': username}, cb);
+}
+
 // copied from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Creating_a_regular_expression
 function escapeRegExp(string){
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -58,5 +62,6 @@ function hashPass(plainText) {
 module.exports = {
   login: login,
   register: register,
-  list: list
+  list: list,
+  delete: del
 }

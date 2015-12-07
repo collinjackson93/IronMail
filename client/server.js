@@ -6,6 +6,7 @@ var fs = require('fs');
 // set defaults to use cookies and allow self-signed SSL certs
 var request = require('request').defaults({jar: true, strictSSL: false});
 var crypto = require('crypto');
+var ursa = require('ursa');
 
 var server = app.listen(5000, function () {
   console.log("Server listening at https://localhost:5000");
@@ -53,6 +54,10 @@ const userListOptions = {
 };
 
 // TODO: delete message
+const deleteMessageOptions = {
+  path: '/deleteMessage',
+  method: 'Post'
+}
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
@@ -75,9 +80,10 @@ app.get('/', function (req, res) {
 
 // ***REGISTRATION***
 app.post('/addNewUser', function(req, res) {
-  var keyExchangeObject = crypto.createDiffieHellman(1024);
-  var pubKey = keyExchangeObject.generateKeys('hex');
-  var privKey = keyExchangeObject.getPrivateKey('hex');
+  var key = ursa.generatePrivateKey();
+  var privKey = key.toPrivatePem().toString();
+  var pubKey = key.toPublicPem().toString();
+
 
   storePrivateKeyLocally(privKey);
 
@@ -139,7 +145,6 @@ function onLoginAttempt(username, password, cb) {
 
 
 
-// ****** OUTDATED ********
 // ***SEND EMAIL***
 app.post('/sendMessage', function(req, res) {
   var cb = function(err, response, val) {
@@ -152,32 +157,13 @@ app.post('/sendMessage', function(req, res) {
   onSentMessage(req.body.receiver, req.body.subject, req.body.content, cb);
 });
 function onSentMessage(receiver, sub, content, cb) {
-  // 1. get user's private key
-  var localPrivateKey = getPrivateKey();
-
-  // 2. get intended recipient's public key
-  getPublicKeyOf(receiver, function(recipientPublicKey) {
-    // 3. initialize DH object with a random prime of length 2048
-    console.log('creating dhObject');
-    var dhObject = crypto.createDiffieHellman(1024);
-    console.log('setting private key');
-    dhObject.setPrivateKey(localPrivateKey, 'hex');
-
-   // 4. generate shared secret, interpreting the string localRecipientKey using hex encoding
-   console.log('generating shared secret');
-    var sharedSecret = dhObject.computeSecret(recipientPublicKey, 'hex', 'hex');
-
-    // 5. encrypt message using shared secret and cipher
-    console.log('creating cipher');
-    var createdCipher = crypto.createCipher(CIPHER, sharedSecret);
-
-    console.log('encrypting text');
-    var encryptedText = createdCipher.update(content, 'utf8', 'hex');
+  getPublicKeyOf(receiver, function(pubKeyString) {
+    var pubKeyObject = ursa.createPublicKey(pubKeyString);
+    var encryptedText = pubKeyObject.encrypt(content, 'utf8', 'hex');
 
     var params = {
       receiver: receiver,
       subject: sub,
-      prime: dhObject.getPrime('hex'),
       content: encryptedText
     };
     console.log('calling server');
@@ -189,7 +175,7 @@ function onSentMessage(receiver, sub, content, cb) {
 app.get('/getMessages', function(req, res) {
   var cb = function(err, response, val) {
     if (err || response.statusCode !== 200) {
-      console.log('failed to retrieve messages: ' + val.toSring());
+      console.log('failed to retrieve messages: ' + val.toString());
       res.send(val);
     } else {
       console.log('messages retrieved');
@@ -197,7 +183,7 @@ app.get('/getMessages', function(req, res) {
 
       // iterate through array, creating a map for faster lookup later
       for (var i = 0; i < val.length; ++i) {
-        inbox[val[0]._id] = val[0];
+        inbox[val[i]._id] = val[i];
       }
     }
   };
@@ -212,23 +198,9 @@ function retrieveMessages(cb) {
 app.post('/openMessage', function(req, res) {
   var messageID = req.body._id;
   var message = inbox[messageID];
-
-  // 1. get sender's public key
-  //var senderPublicKey = getPublicKeyOf(req.body.sender);
-  getPublicKeyOf(message.sender, function(senderPublicKey) {
-    // 2. generate DH object with prime that was originally used
-    var dhObject = crypto.createDiffieHellman(message.sharedPrime, 'hex');
-    dhObject.setPrivateKey(getPrivateKey(), 'hex');
-
-    // 3. generate shared secret, interpreting the string localRecipientKey using hex encoding
-    var sharedSecret = dhObject.computeSecret(senderPublicKey, 'hex', 'hex');
-
-    // 4. create decipher object and decript content
-    var decipherObject = crypto.createDecipher(CIPHER, sharedSecret);
-
-    var decipheredMessage = decipherObject.update(message.content, 'hex', 'utf8');
-    res.send(decipheredMessage);
-  });
+  var privateKey = ursa.createPrivateKey(getPrivateKey());
+  var decipheredMessage = privateKey.decrypt(message.content, 'hex', 'utf8');
+  res.send(decipheredMessage);
 });
 
 // ***GET USER's KEYS***
@@ -278,8 +250,23 @@ function onLogoutAttempt(cb) {
 }
 
 
+// ***DELETE***
+app.post('/deleteMessage', function(req, res) {
+  var cb = function(err, response, val) {
+    if (err || response.statusCode !== 200) {
+      res.send('failed to delete message');
+      console.error(val);
+    } else {
+      res.send('message deleted')
+    }
+  }
+  var params = {
+    _id: req.body._id
+  }
+  callServer(deleteMessageOptions, params, cb);
+})
 
-// ***REMOVE THIS FUNCTION LATER***
+// ***DEBUGGING***
 app.get('/publicPrivateKeyGen', function(req, res) {
   getPublicKeyOf('u4', function(publicKey) {
     var keys = {

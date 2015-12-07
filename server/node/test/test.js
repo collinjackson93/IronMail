@@ -170,7 +170,6 @@ describe('Messages', function() {
     var validParams = {
       username: 'u1',
       password: 'p1',
-      email: 'test@test.com',
       publicKey: 'test'
     };
     users.register(validParams, function(err, response) {
@@ -187,7 +186,7 @@ describe('Messages', function() {
 
   var timeEstimate;
   it('should save a properly formatted message', function(done) {
-    messages.send({receiver: 'u2', prime: 13, subject: 'Testing', content: 'Secret'}, 'u1', function(err, response) {
+    messages.send({receiver: 'u2', subject: 'Testing', content: 'Secret'}, 'u1', function(err, response) {
       // create a timestamp to compare against later
       timeEstimate = Date.now();
       err.should.be.false;
@@ -197,22 +196,22 @@ describe('Messages', function() {
   });
 
   it('should not send a message to a user that does not exist', function(done) {
-    messages.send({receiver: 'invalid', prime: 13, subject: 'Testing', content: 'Secret'}, 'u1', function(err, response) {
+    messages.send({receiver: 'invalid', subject: 'Testing', content: 'Secret'}, 'u1', function(err, response) {
       err.should.be.true;
       response.should.equal("ValidationError: Validator failed for path `receiver` with value `invalid`");
       done();
     });
   });
 
+  var messageID;
   it('should get all messages sent to a user', function(done) {
     messages.get('u2', function(err, response) {
-      // err.should.be.false;
       response.should.have.length(1);
       var retrievedMessage = response[0];
-      retrievedMessage.should.have.keys('_id', 'sender', 'receiver', 'sharedPrime', 'subject', 'content', 'timestamp');
+      retrievedMessage.should.have.keys('_id', 'sender', 'receiver', 'subject', 'content', 'timestamp');
+      messageID = retrievedMessage._id;
       retrievedMessage.sender.should.equal('u1');
       retrievedMessage.receiver.should.equal('u2');
-      retrievedMessage.sharedPrime.should.equal('13');
       retrievedMessage.subject.should.equal('Testing');
       retrievedMessage.content.should.equal('Secret');
       // compare the saved timestamp to the one we created earlier with
@@ -220,6 +219,25 @@ describe('Messages', function() {
       var returnedTimestamp = new Date(retrievedMessage.timestamp).getTime();
       returnedTimestamp.should.be.closeTo(timeEstimate, 500);
       done();
+    });
+  });
+
+  it('should only let the receiver of a message delete it', function(done) {
+    messages.delete(messageID, 'u1', function(err, doc) {
+      should.not.exist(err);
+      should.not.exist(doc);
+      done();
+    });
+  });
+
+  it('should delete a message', function(done) {
+    messages.delete(messageID, 'u2', function(err, doc) {
+      should.not.exist(err);
+      should.exist(doc);
+      messages.get('u2', function(err, response) {
+        response.should.have.length(0);
+        done();
+      });
     });
   });
 });

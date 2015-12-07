@@ -5,7 +5,6 @@ function send(params, sender, cb) {
   var message = new Message({
     sender: sender,
     receiver: params.receiver,
-    sharedPrime: params.prime,
     subject: params.subject,
     content: params.content
   });
@@ -24,7 +23,12 @@ function get(receiver, cb) {
   });
 }
 
+function del(id, username, cb) {
+  Message.findOneAndRemove({'_id': id, 'receiver': username}, cb);
+}
+
 module.exports = {
   send: send,
-  get: get
+  get: get,
+  delete: del
 }

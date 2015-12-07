@@ -24,16 +24,19 @@ app.post('/login', function(req, res) {
   });
 });
 
-// TODO: ensure that user is logged in
 app.get('/logout', function(req, res) {
-  req.session.destroy(function(err) {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Error while logging out: ' + err);
-    } else {
-      res.send('Logged out');
-    }
-  });
+  if (!req.session.username) {
+    res.status(403).send('Not currently logged in');
+  } else {
+    req.session.destroy(function(err) {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Error while logging out: ' + err);
+      } else {
+        res.send('Logged out');
+      }
+    });
+  }
 });
 
 app.post('/user', function(req, res) {
@@ -57,29 +60,63 @@ app.post('/register', function(req, res) {
   });
 });
 
-// TODO: ensure that user is logged in
 app.post('/sendMessage', function(req, res) {
-  messages.send(req.body, req.session.username, function(err, response) {
-    if (err) {
-      res.status(400).send(response);
-    } else {
-      res.send(response);
-    }
-  });
+  if (!req.session.username) {
+    res.status(403).send('Not currently logged in');
+  } else {
+    messages.send(req.body, req.session.username, function(err, response) {
+      if (err) {
+        res.status(400).send(response);
+      } else {
+        res.send(response);
+      }
+    });
+  }
 });
 
-// TODO: ensure that user is logged in
 app.get('/getMessages', function(req, res) {
-  messages.get(req.session.username, function(err, response) {
-    if (err) {
-      res.status(500).send(response);
-    } else {
-      res.json(response);
-    }
-  })
+  if (!req.session.username) {
+    res.status(403).send('Not currently logged in');
+  } else {
+    messages.get(req.session.username, function(err, response) {
+      if (err) {
+        res.status(500).send(response);
+      } else {
+        res.json(response);
+      }
+    });
+  }
 });
 
-// TODO: add delete
+app.post('/deleteMessage', function(req, res) {
+  if (!req.session.username) {
+    res.status(403).send('Not currently logged in');
+  } else  {
+    messages.delete(req.body._id, req.session.username, function(err, doc) {
+      if (err) {
+        res.status(500).send(err.toString());
+      } else if (!doc){
+        res.status(400).send('Could not find message');
+      } else {
+        res.send('Deleted message');
+      }
+    });
+  }
+});
+
+app.post('/deleteUser', function(req, res) {
+  if (req.body.auth.username === 'admin' && req.body.auth.password === 'pass') {
+    users.delete(req.body.username, function(err, doc) {
+      if (err) {
+        res.status(500).send(err.toString());
+      } else if (!doc){
+        res.status(400).send('Could not find user');
+      } else {
+        res.send('Deleted user');
+      }
+    });
+  }
+});
 
 var server = app.listen(3000, function () {
   var port = server.address().port;
