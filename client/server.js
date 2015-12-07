@@ -16,8 +16,6 @@ const FILENAME = "pk.txt";
 var inbox = {};
 var users = {};
 
-const DUMMYPRIVATEKEY = "E9 87 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
-const DUMMYPUBLICKEY = "E9 69 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
 const CIPHER = "aes-256-ctr";
 const HASH = "sha256";
 
@@ -167,11 +165,8 @@ function onSentMessage(receiver, sub, content, cb) {
    console.log('generating shared secret');
     var sharedSecret = dhObject.computeSecret(recipientPublicKey, 'hex', 'hex');
 
-    // 5. encrypt message using shared secret, hash and cipher
-    // console.log('creating hash');
-    // var hashedSecret = crypto.createHash(HASH).update(sharedSecret).digest("binary");
+    // 5. encrypt message using shared secret and cipher
     console.log('creating cipher');
-    // var createdCipher = crypto.createCipheriv(CIPHER, hashedSecret, crypto.randomBytes(512));
     var createdCipher = crypto.createCipher(CIPHER, sharedSecret);
 
     console.log('encrypting text');
@@ -226,11 +221,10 @@ app.post('/openMessage', function(req, res) {
     // 3. generate shared secret, interpreting the string localRecipientKey using hex encoding
     var sharedSecret = dhObject.computeSecret(senderPublicKey, 'hex', 'hex');
 
-    // 4. construct symmetric block cipher
-    var hashedSecret = crypto.createHash(HASH).update(sharedSecret).digest("binary");
-    var decipherObject = crypto.createDecipher(CIPHER, hashedSecret);
+    // 4. create decipher object and decript content
+    var decipherObject = crypto.createDecipher(CIPHER, sharedSecret);
 
-    var decipheredMessage = decipherObject.update(req.body.content);
+    var decipheredMessage = decipherObject.update(message.content, 'hex', 'utf8');
     res.send(decipheredMessage);
   });
 });
