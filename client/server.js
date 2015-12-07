@@ -18,7 +18,7 @@ var users = {};
 
 const DUMMYPRIVATEKEY = "E9 87 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
 const DUMMYPUBLICKEY = "E9 69 3D 79 C6 D8 7D C0 FB 6A 57 78 63 33 89 F4 45 32 13 30 3D A6 1F 20 BD 67 FC 23 3A A3 32 62";
-const CYPHER = "aes-256-ctr";
+const CIPHER = "aes-256-ctr";
 const HASH = "sha256";
 
 var privateKey = null;
@@ -75,14 +75,14 @@ app.get('/', function (req, res) {
 
 // ***REGISTRATION***
 app.post('/addNewUser', function(req, res) {
-  var keyExchangeObject = crypto.getDiffieHellman('modp14');
+  var keyExchangeObject = crypto.createDiffieHellman(1024);
   var pubKey = keyExchangeObject.generateKeys('hex');
   var privKey = keyExchangeObject.getPrivateKey('hex');
 
   storePrivateKeyLocally(privKey);
 
   var cb = function(err, response, val) {
-    if (err || response.status !== 200) {
+    if (err || response.statusCode != 200) {
       res.send("register failed");
       console.error(val);
     } else {
@@ -120,7 +120,7 @@ function storePrivateKeyLocally(key) {
 // ***LOGIN***
 app.post('/logIn', function(req, res) {
   var cb = function(err, response, val) {
-    if (err || response.status !== 200) {
+    if (err || response.statusCode !== 200) {
       res.send('login failed');
       console.error(val);
     } else {
@@ -143,7 +143,7 @@ function onLoginAttempt(username, password, cb) {
 // ***SEND EMAIL***
 app.post('/sendMessage', function(req, res) {
   var cb = function(err, response, val) {
-    if (err || response.status !== 200) {
+    if (err || response.statusCode !== 200) {
       res.send(val);
     } else {
       res.send('email sent');
@@ -153,38 +153,44 @@ app.post('/sendMessage', function(req, res) {
 });
 function onSentMessage(receiver, sub, content, cb) {
   // 1. get user's private key
-  var localPrivateKey = DUMMYPRIVATEKEY;
+  var localPrivateKey = getPrivateKey();
 
   // 2. get intended recipient's public key
-  //var recipientPublicKey = getPublicKeyOf(receiver);
-  var localRecipientKey = DUMMYPUBLICKEY;
+  getPublicKeyOf(receiver, function(recipientPublicKey) {
+    // 3. initialize DH object with a random prime of length 2048
+    console.log('creating dhObject');
+    var dhObject = crypto.createDiffieHellman(1024);
+    console.log('setting private key');
+    dhObject.setPrivateKey(localPrivateKey, 'hex');
 
-  // 3. initialize DH object with a random prime of length 512
-  var dhObject = crypto.createDiffieHellman(512);
-  dhObject.setPrivateKey(DUMMYPRIVATEKEY, 'hex');
+   // 4. generate shared secret, interpreting the string localRecipientKey using hex encoding
+   console.log('generating shared secret');
+    var sharedSecret = dhObject.computeSecret(recipientPublicKey, 'hex', 'hex');
 
- // 4. generate shared secret, interpreting the string localRecipientKey using hex encoding
-  var sharedSecret = dhObject.computeSecret(localRecipientKey, 'hex', 'hex');
+    // 5. encrypt message using shared secret, hash and cipher
+    console.log('creating hash');
+    var hashedSecret = crypto.createHash(HASH).update(sharedSecret).digest("binary");
+    console.log('creating cipher');
+    var createdCipheriv = crypto.createCipheriv(CIPHER, hashedSecret, crypto.randomBytes(512));
 
-  // 5. encrypt message using shared secret, hash and cypher
-  var hashedSecret = crypto.createHash(HASH).update(sharedSecret).digest("binary");
-  var createdCypher = crypto.createCypher(CYPHER, hashedSecret, crypto.randomBytes(128));
+    console.log('encrypting text');
+    var encryptedText = createdCypher.update(content);
 
-  var encryptedText = createdCypher.update(content);
-
-  var params = {
-    receiver: receiver,
-    subject: sub,
-    sharedPrime: dhObject.getPrime(),
-    content: encryptedText
-  };
-  callServer(sentMessageOptions, params, cb);
-};
+    var params = {
+      receiver: receiver,
+      subject: sub,
+      sharedPrime: dhObject.getPrime(),
+      content: encryptedText
+    };
+    console.log('calling server');
+    callServer(sentMessageOptions, params, cb);
+  });
+}
 
 // ***RETRIEVE MESSAGES***
 app.get('/getMessages', function(req, res) {
   var cb = function(err, response, val) {
-    if (err || response.status !== 200) {
+    if (err || response.statusCode !== 200) {
       console.log('failed to retrieve messages: ' + val.toSring());
       res.send(val);
     } else {
@@ -202,7 +208,7 @@ app.get('/getMessages', function(req, res) {
 function retrieveMessages(cb) {
   var params = {};
   callServer(getMessagesOptions, params, cb);
-};
+}
 
 // ***OPEN MESSAGE***
 app.post('/openMessage', function(req, res) {
@@ -211,57 +217,56 @@ app.post('/openMessage', function(req, res) {
 
   // 1. get sender's public key
   //var senderPublicKey = getPublicKeyOf(req.body.sender);
-  var senderPublicKey = DUMMYPUBLICKEY;
+  getPublicKeyOf(message.sender, function(senderPublicKey) {
+    // 2. generate DH object with prime that was originally used
+    var dhObject = crypto.createDiffieHellman(message.sharedPrime);
+    dhObject.setPrivateKey(getPrivateKey(), 'hex');
 
-  // 2. generate DH object with prime that was originally used
-  var dhObject = crypto.createDiffieHellman(message.sharedPrime);
-  dhObject.setPrivateKey(DUMMYPRIVATEKEY, 'hex');
+    // 3. generate shared secret, interpreting the string localRecipientKey using hex encoding
+    var sharedSecret = dhObject.computeSecret(senderPublicKey, 'hex', 'hex');
 
-  // 3. generate shared secret, interpreting the string localRecipientKey using hex encoding
-  var sharedSecret = dhObject.computeSecret(senderPublicKey, 'hex', 'hex');
+    // 4. construct symmetric block cipher
+    var hashedSecret = crypto.createHash(HASH).update(sharedSecret).digest("binary");
+    var decipherObject = crypto.createDecipher(CIPHER, hashedSecret);
 
-  // 4. construct symmetric block cypher
-  var hashedSecret = crypto.createHash(HASH).update(sharedSecret).digest("binary");
-  var decipherObject = crypto.createDecipher(CYPHER, hashedSecret);
-
-  var decipheredMessage = decipherObject.update(req.body.content);
-  res.send(decipheredMessage);
+    var decipheredMessage = decipherObject.update(req.body.content);
+    res.send(decipheredMessage);
+  });
 });
 
 // ***GET USER's KEYS***
-function getPublicKeyOf(user) {
-  var keyValue = -1;
-  var cb = function(err, response, val) {
-    if (err || response.status !== 200) {
-      keyValue = null;
+function getPublicKeyOf(user, cb) {
+  var params = {username: user};
+  callServer(userListOptions, params, function(err, response, val) {
+    if (err || response.statusCode !== 200) {
+      console.error(val);
+      cb(null);
     } else {
-      keyValue = val;
+      for(var i = 0; i < val.length; ++i) {
+        if(val[i].username == user) {
+          return cb(val[i].publicKey);
+        }
+      }
+      // username was not found for some reason
+      cb('failed to find');
     }
-  }
-  callServer(userListOptions, user, cb);
-  if (keyValue == -1) {
-    return 'synchronizing issue';
-  } else {
-    return keyValue;
-  }
+  });
 }
 function getPrivateKey() {
-  var privateKey = fs.readFile(FILENAME, function(error, data) {
-    if (error) {
-      console.log('private key not found');
-      throw new Error;
-      } else {
-        console.log('private key found');
-        return data;
-      }
-  })
-  return privateKey;
-};
+  var retVal;
+  try {
+    retVal = fs.readFileSync(FILENAME, 'utf8');
+  } catch (e) {
+    retVal = e.toString();
+  } finally {
+    return retVal;
+  }
+}
 
 // ***LOGOUT***
 app.get('/logout', function(req, res) {
   var cb = function(err, response, val) {
-    if (err || response.status !== 200) {
+    if (err || response.statusCode !== 200) {
       res.send('logout failed');
       console.error(val);
     } else {
@@ -273,15 +278,17 @@ app.get('/logout', function(req, res) {
 function onLogoutAttempt(cb) {
   var params = {};
   callServer(logoutOptions, params, cb);
-};
+}
 
 
 
 // ***REMOVE THIS FUNCTION LATER***
 app.get('/publicPrivateKeyGen', function(req, res) {
-  var keys = {
-    public: DUMMYPUBLICKEY,
-    private: DUMMYPRIVATEKEY
-  }
-  res.send(keys);
+  getPublicKeyOf('u4', function(publicKey) {
+    var keys = {
+      public: publicKey,
+      private: getPrivateKey()
+    };
+    res.json(keys);
+  });
 });
