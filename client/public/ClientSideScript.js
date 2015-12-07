@@ -9,6 +9,18 @@ var bcc = false;
 var publicKey = "";
 var privateKey = "";
 
+//get interface
+function getPageWithCallback(url, callback) {
+    var httpRequest = new XMLHttpRequest();
+    httpRequest.onreadystatechange = function() {
+        if (httpRequest.readyState == 4 && httpRequest.status == 200)
+            callback(httpRequest.responseText);
+    }
+
+    httpRequest.open("GET", url, true);
+    httpRequest.send(null);
+}
+
 function signUp(firstname, lastname, userid, email, password, passwordconfirm){
     // First check that passwords match
     if(password.value!==passwordconfirm.value) {
@@ -22,39 +34,77 @@ function signUp(firstname, lastname, userid, email, password, passwordconfirm){
         return;
     }
     else{
-        whoIsLoggedInID = userid;
 
-        d3.select("#logInDiv").selectAll('button').remove();
-        d3.select('#logInDiv').selectAll('input').remove();
-        d3.select('#logInDiv').append('button').text("Log Out").on({"click": function(){
-            logOut();
-        }}).style('margin', '0 auto');
+        $.ajax({
+            url: '/addNewUser',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({username: userid, password: password}),
+            complete: function (req, status) {
+                console.log(req);
+                /*
+                if(req.messageText === "signed up"){
+                    alert('You are now signed up, ' + userid + "!");
+                    whoIsLoggedInID = userid;
 
-        var upperRightCornerText = d3.select("#upperrightcornertext").text("Hello, " + whoIsLoggedInID + ": Log out here!");
+                    d3.select("#logInDiv").selectAll('button').remove();
+                    d3.select('#logInDiv').selectAll('input').remove();
+                    d3.select('#logInDiv').append('button').text("Log Out").on({"click": function(){
+                        logOut();
+                    }}).style('margin', '0 auto');
 
-        wipeLoginScreens();
+                    var upperRightCornerText = d3.select("#upperrightcornertext").text("Hello, " + whoIsLoggedInID + ": Log out here!");
+
+                    wipeLoginScreens();
+                }
+                else{
+                    alert('Eh...try a different username.');
+                }*/
+            }
+
+        });
     }
 }
 
-function logIn(username, password){
+function logIn(user, pass) {
 
-    //TODO verify the id and log them in via server
-    if((username==="")||(password==="")){
+    if ((user === "") || (pass === "")) {
         alert('You left a log in field blank. Try again.');
         return;
     }
-    whoIsLoggedInID = username; //log them in
-    console.log(whoIsLoggedInID);
 
-    var upperRightCornerText = d3.select("#upperrightcornertext").text("Hello, " + whoIsLoggedInID + ": Log out here!");
-    d3.select("#logInDiv").selectAll('button').remove();
-    d3.select('#logInDiv').selectAll('input').remove();
-    d3.select('#logInDiv').append('button').text("Log Out").on({"click": function(){
-        logOut();
-    }}).style('margin', '0 auto');
+    $.ajax({
+        url: '/logIn',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({username: user, password: pass}),
+        complete: function (req, status) {
+            if (status === "success") {
+                if (req.responseText === "login failed") {
+                    alert('Invalid Credentials. Try again.');
+                    return;
+                }
+                else {
+                    whoIsLoggedInID = user; //log them in
+                    console.log(whoIsLoggedInID);
 
-    wipeLoginScreens();
+                    var upperRightCornerText = d3.select("#upperrightcornertext").text("Hello, " + whoIsLoggedInID + ": Log out here!");
+                    d3.select("#logInDiv").selectAll('button').remove();
+                    d3.select('#logInDiv').selectAll('input').remove();
+                    d3.select('#logInDiv').append('button').text("Log Out").on({
+                        "click": function () {
+                            logOut();
+                        }
+                    }).style('margin', '0 auto');
 
+                    wipeLoginScreens();
+                }
+            }
+            else {
+                console.log("error");
+            }
+        }
+    });
 }
 
 //only called if someone is already logged in...
@@ -72,6 +122,7 @@ function logOut(){
     }});
     console.log("logging out");
     resetToLoginPage();
+    getPageWithCallback("/logout", function(retval){console.log(retval);})
 }
 
 function loadEmails(){
@@ -176,8 +227,11 @@ function wipeLoginScreens(){
 
     var discardButton = menubar.append('button').text('Discard').style('display', 'inline')
         .style('height', '100%').style('width', '20%');
-    var forwardButton = menubar.append('button').text('Forward').style('display', 'inline')
-        .style('height', '100%').style('width', '20%');
+
+    var forwardButton = menubar.append('button').text('Pull').style('display', 'inline')
+        .style('height', '100%').style('width', '20%').on({"click":function(){
+            pullInbox();
+        }});
     var bccButton = menubar.append('button').text('Add CC').style('display', 'inline')
         .style('height', '100%').style('width', '20%').attr('id', 'bccButton');
     var receiveButton = menubar.append('button').text('Check Email').style('display', 'inline').
@@ -256,6 +310,24 @@ function wipeLoginScreens(){
             return;
         }
 
+        $.ajax({
+            url: '/sendMessage',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({receiver: document.getElementById('to').value,
+                subject: document.getElementById('subject').value,
+                content: document.getElementById('emailArea').value}),
+            complete: function (req, status) {
+                if(req.messageText === "email sent"){
+                    console.log("message sent");
+                }
+                else{
+                    console.log("failure");
+                    console.log(req + " " + status);
+                }
+
+            }});
+
         d3.select('#to').property("value", function () {
             return "";
         });
@@ -303,4 +375,14 @@ function inboxCheck(){
 
     d3.select('.signup').append('br');
     num++;
+}
+
+
+function pullInbox(){
+    getPageWithCallback("/getMessages", function(retval){
+
+        console.log(retval);
+
+
+    });
 }
