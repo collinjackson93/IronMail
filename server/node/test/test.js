@@ -15,7 +15,6 @@ describe('Users', function() {
     var validParams = {
       username: 'u1',
       password: 'p1',
-      email: 'test@test.com',
       publicKey: 'test'
     };
     afterEach(function() {
@@ -23,7 +22,6 @@ describe('Users', function() {
       validParams = {
         username: 'u1',
         password: 'p1',
-        email: 'test@test.com',
         publicKey: 'test'
       };
     });
@@ -48,15 +46,15 @@ describe('Users', function() {
       });
     });
 
-    it('should not accept an invalid email', function(done) {
-      var badEmail = validParams;
-      badEmail.email = 'notanEmail';
-      users.register(badEmail, function(err, response) {
-        err.should.be.true;
-        response.should.equal("ValidationError: Validator failed for path `email` with value `notanEmail`");
-        done();
-      });
-    });
+    // it('should not accept an invalid email', function(done) {
+    //   var badEmail = validParams;
+    //   badEmail.email = 'notanEmail';
+    //   users.register(badEmail, function(err, response) {
+    //     err.should.be.true;
+    //     response.should.equal("ValidationError: Validator failed for path `email` with value `notanEmail`");
+    //     done();
+    //   });
+    // });
 
     it('should not store passwords in plain text', function(done) {
       var userModel = require('../db/userModel');
@@ -78,7 +76,6 @@ describe('Users', function() {
       var validParams = {
         username: 'u1',
         password: 'p1',
-        email: 'test@test.com',
         publicKey: 'test'
       };
       users.register(validParams, function(err, response) {
@@ -119,7 +116,6 @@ describe('Users', function() {
       var validParams = {
         username: 'u1',
         password: 'p1',
-        email: 'test@test.com',
         publicKey: 'test'
       };
       users.register(validParams, function(err, response) {
