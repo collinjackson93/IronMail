@@ -4,10 +4,14 @@ Application for sending encrypted emails
 Server is live at 107.170.176.250
 
 ## Running Instructions
+*Updated* - run `docker run -p 80:5000 collinjackson93/ironmail`, then skip to last step
  - `cd` into `client` subdirectory
  - run `docker build -t client .`
  - run `docker run -p 80:5000 client`
  - navigate to `http://[docker IP]` in your web browser (you can get your docker IP by running `docker-machine ip default`; it is usually `192.168.99.100`)
+
+## Beta Release
+
 
 ## Development Guidelines
 - Code in the master branch must be functional and pass all tests. If a feature can be finished in a commit or two, it can be added directly to the master branch. Otherwise, create a new branch to develop the feature in.
