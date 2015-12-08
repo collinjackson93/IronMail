@@ -3,11 +3,14 @@
  */
 var areWeSignedUp = false;
 var areWeLoggedIn = false;
-var num = 0;
+var num = 1;
 var whoIsLoggedInID = undefined;
 var bcc = false;
 var publicKey = "";
 var privateKey = "";
+
+var haveAlreadyPulled = false;
+
 
 //get interface
 function getPageWithCallback(url, callback) {
@@ -223,7 +226,7 @@ function wipeLoginScreens(){
         style("box-sizing", "border-box");
 
     var encryptAndSendButton = menubar.append('button').text('Encrypt and Send').style('display', 'inline')
-        .style('height', '100%').style('width', '20%');
+        .style('height', '100%').style('width', '20%').attr('id', 'encryptAndSendButton');
 
     var discardButton = menubar.append('button').text('Discard').style('display', 'inline')
         .style('height', '100%').style('width', '20%');
@@ -341,9 +344,7 @@ function wipeLoginScreens(){
     }});
 }
 
-function inboxCheck(){
-    console.log('check inbox');
-
+function inboxCheck(sender, subject, id){
     var square = d3.select(".signup").insert("svg", ":first-child").attr("width", '100%').attr("height", '50px');
 
     square.append("rect").attr("x", 0).attr("y", 0).attr("width", '100%').attr('height', '50px').style("fill", "#B19CD9");
@@ -356,10 +357,20 @@ function inboxCheck(){
             console.log("delete");
         }});
 
-    square.append('rect').attr('x', 355).attr('y', 5).attr('width', '70px').attr('height', '40px').style('fill', 'lightblue')
-        .on({"click": function(){
+    var open = square.append('rect');
+
+    open.attr('x', 355).attr('y', 5).attr('width', '70px').attr('height', '40px')
+        .style('fill', 'lightblue');
+
+    open.attr('emailID', id);
+
+    open.on({"click": function(){
             console.log("open");
+            var myID = d3.select(this).attr('emailID');
+            console.log(myID);
+            openMessage(myID);
         }});
+
 
     square.append('text').attr('x', 440).attr('y', 30).attr('font-family', 'Copperplate Light Gothic')
         .attr('font-size', '10pt').attr('fill', 'black').text("DELETE")
@@ -367,10 +378,19 @@ function inboxCheck(){
             console.log("delete");
         }});
 
-    square.append('text').attr('x', 370).attr('y', 30).attr('font-family', 'Copperplate Light Gothic')
-        .attr('font-size', '10pt').attr('fill', 'black').text("OPEN")
+    var mine = square.append('text').attr('x', 370).attr('y', 30).attr('font-family', 'Copperplate Light Gothic')
+        .attr('font-size', '10pt').attr('fill', 'black').text("OPEN");
+
+    square.append('text').attr('x', 20).attr('y', 20).attr('font-family', 'Copperplate Light Gothic')
+        .attr('font-size', '10pt').attr('fill', 'black').text("FROM: " + sender)
         .on({"click": function(){
-            console.log("open");
+            console.log("delete");
+        }});
+
+    square.append('text').attr('x', 20).attr('y', 40).attr('font-family', 'Copperplate Light Gothic')
+        .attr('font-size', '10pt').attr('fill', 'black').text("SUBJECT: " + subject)
+        .on({"click": function(){
+            console.log("delete");
         }});
 
     d3.select('.signup').append('br');
@@ -381,8 +401,34 @@ function inboxCheck(){
 function pullInbox(){
     getPageWithCallback("/getMessages", function(retval){
 
-        console.log(retval);
+        if(haveAlreadyPulled){
+            console.log('clear old svgs');
+            d3.selectAll('svg').remove();
+        }
+        num = 1;
 
+        var retjson = JSON.parse(retval);
 
+        for(var data in retjson){
+            //console.log(retjson[data]);
+            console.log(retjson[data]._id);
+            console.log(retjson[data].sender);
+            console.log(retjson[data].subject);
+            inboxCheck(retjson[data].sender, retjson[data].subject, retjson[data]._id);
+        }
+
+        haveAlreadyPulled = true;
     });
+}
+
+function openMessage(id){
+    $.ajax({
+        url: '/openMessage',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({_id: id}),
+
+        complete: function (req, status) {
+            console.log(req);
+        }});
 }
