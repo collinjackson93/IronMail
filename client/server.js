@@ -197,9 +197,14 @@ function retrieveMessages(cb) {
 // ***OPEN MESSAGE***
 app.post('/openMessage', function(req, res) {
   var messageID = req.body._id;
+  console.log(messageID);
   var message = inbox[messageID];
+  console.log(message);
   var privateKey = ursa.createPrivateKey(getPrivateKey());
+  console.log(privateKey);
+  console.log(getPrivateKey());
   var decipheredMessage = privateKey.decrypt(message.content, 'hex', 'utf8');
+  console.log(decipheredMessage);
   res.send(decipheredMessage);
 });
 

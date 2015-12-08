@@ -8,6 +8,8 @@ var whoIsLoggedInID = undefined;
 var bcc = false;
 var publicKey = "";
 var privateKey = "";
+var inEmailReadingMode = true;
+var isAnEmailActuallyOpen = false;
 
 var haveAlreadyPulled = false;
 
@@ -26,15 +28,18 @@ function getPageWithCallback(url, callback) {
 
 function signUp(firstname, lastname, userid, email, password, passwordconfirm){
     // First check that passwords match
-    if(password.value!==passwordconfirm.value) {
+    if(password!==passwordconfirm) {
         d3.select("#signupPASSWORD").property("value", function () {
             return "";
         });
         d3.select("#signupPASSWORDCONFIRM").property("value", function () {
             return "";
         });
-        alert('password does not match');
+        alert('passwords do not match');
         return;
+    }
+    else if((password === "")||(passwordconfirm=== "")){
+        alert('passwords do not match');
     }
     else{
 
@@ -45,8 +50,8 @@ function signUp(firstname, lastname, userid, email, password, passwordconfirm){
             data: JSON.stringify({username: userid, password: password}),
             complete: function (req, status) {
                 console.log(req);
-                /*
-                if(req.messageText === "signed up"){
+
+                if(req.responseText == "true"){
                     alert('You are now signed up, ' + userid + "!");
                     whoIsLoggedInID = userid;
 
@@ -60,9 +65,16 @@ function signUp(firstname, lastname, userid, email, password, passwordconfirm){
 
                     wipeLoginScreens();
                 }
-                else{
+                else if(req.responseText === "register failed"){
                     alert('Eh...try a different username.');
-                }*/
+                    document.getElementById('signupFirstName').value = "";
+                    document.getElementById('signupLastName').value = "";
+                    document.getElementById('signupUSERID').value = "";
+                    document.getElementById('signupEMAIL').value = "";
+                    document.getElementById('signupPASSWORD').value = "";
+                    document.getElementById('signupPASSWORDCONFIRM').value = "";
+
+                }
             }
 
         });
@@ -128,10 +140,6 @@ function logOut(){
     getPageWithCallback("/logout", function(retval){console.log(retval);})
 }
 
-function loadEmails(){
-
-}
-
 function resetToLoginPage(){
     var lefttab = d3.select("#lefttab");
     var righttab = d3.select('#righttab');
@@ -177,11 +185,11 @@ function resetToLoginPage(){
         myspan.append('li').text('Emails stay off your machine until you request them');
         myspan.append('li').text('Link your unencrypted email to IronMail to contact users outside the IronMail network');
 
-        d3.select('#righttab').append('p').text('Tutorial: IronMail in 5 minutes')
+        d3.select('#righttab').append('p').text('Tutorial: IronMail in under 2 minutes')
             .style("font-family", "Copperplate Gothic Light")
             .style('font-size', '20px').style('color', 'black');
         d3.select('#righttab').append('iframe')
-            .attr('height', '300vh').attr('width', '100%').attr('src', 'https://www.youtube.com/embed/EuJbsF0yLfw')
+            .attr('height', '300vh').attr('width', '100%').attr('src', 'https://www.youtube.com/embed/nEdnOT3lulE')
             .attr('frameborder', '0').attr('allowfullscreen', 'allowfullscreen');
 
         d3.select('#signUpNow').on({"click": function(){
@@ -225,20 +233,54 @@ function wipeLoginScreens(){
         style("width", "100%").
         style("box-sizing", "border-box");
 
-    var encryptAndSendButton = menubar.append('button').text('Encrypt and Send').style('display', 'inline')
+    var receiveButton = menubar.append('button');
+
+    receiveButton.text('Check Email').style('display', 'inline').
+    style('height', '100%').style('width', '20%').style('background-color', 'green')
+        .on({"click":function() {
+                pullInbox();
+        }});
+
+    receiveButton.on({"mouseover":function(){
+        receiveButton.style('background-color', 'rgb(0,170,0)')
+    }});
+
+    receiveButton.on({"mouseout":function(){
+        receiveButton.style('background-color', 'green')
+    }});
+
+    var encryptAndSendButton = menubar.append('button');
+
+    encryptAndSendButton.text('Compose').style('display', 'inline')
         .style('height', '100%').style('width', '20%').attr('id', 'encryptAndSendButton');
 
-    var discardButton = menubar.append('button').text('Discard').style('display', 'inline')
+    var discardButton = menubar.append('button');
+    discardButton.text('Discard').style('display', 'inline')
         .style('height', '100%').style('width', '20%');
+    discardButton.attr('disabled', 'disabled');
+    discardButton.attr('id', 'discardButton');
 
-    var forwardButton = menubar.append('button').text('Pull').style('display', 'inline')
+    var forwardButton = menubar.append('button');
+
+    forwardButton.text('Reply').style('display', 'inline')
         .style('height', '100%').style('width', '20%').on({"click":function(){
-            pullInbox();
+
         }});
-    var bccButton = menubar.append('button').text('Add CC').style('display', 'inline')
+    forwardButton.attr('disabled', 'disabled');
+    forwardButton.attr('id', 'reply');
+    forwardButton.on({"click": function(){
+        var params = {
+            replysend: d3.select('#to').property("value").toString().substring(6),
+            replysubj: d3.select('#subject').property("value").toString().substring(9),
+            replyemail: d3.select('#emailArea').property("value").toString()
+        };
+        enterComposeMode(true, params);
+    }});
+
+    var bccButton = menubar.append('button');
+    bccButton.text('Add CC').style('display', 'inline')
         .style('height', '100%').style('width', '20%').attr('id', 'bccButton');
-    var receiveButton = menubar.append('button').text('Check Email').style('display', 'inline').
-        style('height', '100%').style('width', '20%').style('background-color', 'green');
+    bccButton.attr('disabled', 'disabled');
 
     var inputsBar = righttab.append('div').
         style("background-color", "blue").
@@ -248,15 +290,11 @@ function wipeLoginScreens(){
         style("box-sizing", "border-box").
         attr('id', 'inputDIV');
 
-    inputsBar.append('input').attr('id', 'to').attr('placeholder', 'To:').style('width', '100%').style('box-sizing', 'border-box');
+    inputsBar.append('input').attr('id', 'to').attr('disabled', 'disabled').style('width', '100%').style('box-sizing', 'border-box');
     inputsBar.append('br');
-    inputsBar.append('input').attr('id', 'subject').attr('placeholder', 'Subject:')
+    inputsBar.append('input').attr('id', 'subject').attr('disabled', 'disabled')
         .style('width', '100%').style('box-sizing', 'border-box');
     inputsBar.append('br');
-
-    receiveButton.on({"click": function(){
-        inboxCheck();
-    }});
 
     bccButton.on({"click": function(){
         if(bcc===false){
@@ -286,27 +324,27 @@ function wipeLoginScreens(){
         style("box-sizing", "border-box").
         attr('id', 'titleDiv');
 
-    var emailarea = righttab.append('textarea').
-        style("padding", "10px").
+    var emailarea = righttab.append('textarea');
+
+        emailarea.style("padding", "10px").
         style("height", "50vh").
         style("width", "100%").
         style("box-sizing", "border-box").
-        attr('id', 'emailArea');
+        attr('id', 'emailArea').
+        attr('disabled', 'disabled');
 
     discardButton.on({"click": function(){
-        d3.select('#to').property("value", function () {
-            return "";
-        });
-        d3.select('#subject').property("value", function () {
-            return "";
-        });
-        d3.select('#emailArea').property("value", function () {
-            return "";
-        });
-        alert('Draft Discarded.');
+        if(!inEmailReadingMode) {
+            alert('Draft Discarded.');
+            enterComposeMode(false);
+        }
     }});
 
     encryptAndSendButton.on({"click": function(){
+        if(inEmailReadingMode){
+            enterComposeMode(true);
+            return;
+        }
 
         if( document.getElementById('to').value === '' ){
             alert('Sorry, you must specify an adressee.');
@@ -331,6 +369,25 @@ function wipeLoginScreens(){
 
             }});
 
+        enterComposeMode(false);
+        alert('Message Sent!');
+
+    }});
+
+    //when the above elements are finished loading, check inbox!
+    $(document).ready(function(){
+        pullInbox();
+    });
+}
+
+function enterComposeMode(bool, replyParams){
+    if(bool){
+        isAnEmailActuallyOpen = false;
+
+        document.getElementById('reply').disabled = true;
+        document.getElementById('discardButton').disabled = false;
+        document.getElementById('bccButton').disabled = false;
+
         d3.select('#to').property("value", function () {
             return "";
         });
@@ -340,11 +397,64 @@ function wipeLoginScreens(){
         d3.select('#emailArea').property("value", function () {
             return "";
         });
-        alert('Message Sent!');
-    }});
+
+        if(replyParams!==undefined){
+            d3.select('#to').property("value", function () {
+                return replyParams.replysend;
+            });
+            d3.select('#subject').property("value", function () {
+                return "RE: " + replyParams.replysubj;
+            });
+            d3.select('#emailArea').property("value", function () {
+                return "\n------------ORIGINAL MESSAGE------------\n"
+                    + "FROM: " + replyParams.replysend + "\n" +
+                    "SUBJECT: " + replyParams.replysubj + "\n"
+                    + replyParams.replyemail + "\n------------END ORIGINAL MESSAGE------------\n";
+            });
+        }
+
+        d3.select('#to').attr('placeholder', 'TO: ');
+        d3.select('#subject').attr('placeholder', 'SUBJECT: ');
+
+        document.getElementById('to').disabled = false;
+        document.getElementById('subject').disabled = false;
+        document.getElementById('emailArea').disabled = false;
+        d3.select('#encryptAndSendButton').text('Encrypt and Send');
+        inEmailReadingMode = false;
+    }
+    else{
+
+        document.getElementById('discardButton').disabled = true;
+
+
+        d3.select('#to').property("value", function () {
+            return "";
+        });
+        d3.select('#subject').property("value", function () {
+            return "";
+        });
+        d3.select('#emailArea').property("value", function () {
+            return "";
+        });
+
+        d3.select('#to').attr('placeholder', '');
+        d3.select('#subject').attr('placeholder', '');
+
+        document.getElementById('to').disabled = true;
+        document.getElementById('subject').disabled = true;
+        document.getElementById('emailArea').disabled = true;
+
+        d3.select('#encryptAndSendButton').text('Compose');
+
+        if(document.getElementById('bccButton').innerHTML === "Hide CC") {
+            $('#bccButton').click();
+        }
+        document.getElementById('bccButton').disabled = true;
+        inEmailReadingMode = true;
+    }
 }
 
-function inboxCheck(sender, subject, id){
+function inboxCheck(sender, subject, id, timestamp){
     var square = d3.select(".signup").insert("svg", ":first-child").attr("width", '100%').attr("height", '50px');
 
     square.append("rect").attr("x", 0).attr("y", 0).attr("width", '100%').attr('height', '50px').style("fill", "#B19CD9");
@@ -352,9 +462,27 @@ function inboxCheck(sender, subject, id){
         attr('font-size', '10pt').attr('fill', 'blue').text(num);
 
     square.append('rect').attr('x', 400).attr('y', 5).attr('width', '10px').attr('height', '40px').style('fill', 'goldenrod');
-    square.append('rect').attr('x', 430).attr('y', 5).attr('width', '70px').attr('height', '40px').style('fill', 'red')
-        .on({"click": function(){
+
+    var deleter = square.append('rect');
+
+    deleter.attr('x', 430).attr('y', 5).attr('width', '70px').attr('height', '40px').style('fill', 'red');
+    deleter.attr('emailID', id);
+
+    deleter.on({"click": function(){
             console.log("delete");
+            var myID = d3.select(this).attr('emailID');
+            console.log(myID);
+            deleteMessage(myID);
+            d3.select('#to').property("value", function () {
+                return "";
+            });
+            d3.select('#subject').property("value", function () {
+                return "";
+            });
+            d3.select('#emailArea').property("value", function () {
+                return "";
+
+            });
         }});
 
     var open = square.append('rect');
@@ -365,10 +493,37 @@ function inboxCheck(sender, subject, id){
     open.attr('emailID', id);
 
     open.on({"click": function(){
+
+            isAnEmailActuallyOpen = true;
+            document.getElementById('reply').disabled = false;
+            inEmailReadingMode = true;
+            d3.select('#to').property("value", function () {
+                return "";
+            });
+            d3.select('#subject').property("value", function () {
+                return "";
+            });
+            d3.select('#emailArea').property("value", function () {
+                return "";
+            });
+
+            d3.select('#to').attr('placeholder', '');
+            d3.select('#subject').attr('placeholder', '');
+
+            document.getElementById('to').disabled = true;
+            document.getElementById('subject').disabled = true;
+            document.getElementById('emailArea').disabled = true;
+
             console.log("open");
             var myID = d3.select(this).attr('emailID');
-            console.log(myID);
-            openMessage(myID);
+            d3.select('#to').property("value", function () {
+                return "FROM: " + sender;
+            });
+            d3.select('#subject').property("value", function () {
+                return "SUBJECT: " + subject;
+            });
+            openMessage(id);
+
         }});
 
 
@@ -381,17 +536,22 @@ function inboxCheck(sender, subject, id){
     var mine = square.append('text').attr('x', 370).attr('y', 30).attr('font-family', 'Copperplate Light Gothic')
         .attr('font-size', '10pt').attr('fill', 'black').text("OPEN");
 
-    square.append('text').attr('x', 20).attr('y', 20).attr('font-family', 'Copperplate Light Gothic')
+    square.append('text').attr('x', 20).attr('y', 15).attr('font-family', 'Copperplate Light Gothic')
         .attr('font-size', '10pt').attr('fill', 'black').text("FROM: " + sender)
         .on({"click": function(){
             console.log("delete");
         }});
 
-    square.append('text').attr('x', 20).attr('y', 40).attr('font-family', 'Copperplate Light Gothic')
+    square.append('text').attr('x', 20).attr('y', 30).attr('font-family', 'Copperplate Light Gothic')
         .attr('font-size', '10pt').attr('fill', 'black').text("SUBJECT: " + subject)
         .on({"click": function(){
             console.log("delete");
         }});
+
+    square.append('text').attr('x', 20).attr('y', 45).attr('font-family', 'Copperplate Light Gothic').
+        attr('font-size', '10pt').attr('fill', 'blue').text("SENT on: " +
+                                                                timestamp.toString().substring(0,10) + " at " +
+                                                                    timestamp.toString().substring(11));
 
     d3.select('.signup').append('br');
     num++;
@@ -410,11 +570,7 @@ function pullInbox(){
         var retjson = JSON.parse(retval);
 
         for(var data in retjson){
-            //console.log(retjson[data]);
-            console.log(retjson[data]._id);
-            console.log(retjson[data].sender);
-            console.log(retjson[data].subject);
-            inboxCheck(retjson[data].sender, retjson[data].subject, retjson[data]._id);
+            inboxCheck(retjson[data].sender, retjson[data].subject, retjson[data]._id, retjson[data].timestamp);
         }
 
         haveAlreadyPulled = true;
@@ -429,6 +585,28 @@ function openMessage(id){
         data: JSON.stringify({_id: id}),
 
         complete: function (req, status) {
-            console.log(req);
+            var resp = req['responseText'];
+            console.log(resp);
+            d3.select('#emailArea').property("value", function () {
+                inEmailReadingMode = true;
+                d3.select('#encryptAndSendButton').text('Compose');
+
+                d3.select('bccButton').text('');
+                d3.select('#bccButton').attr('disabled', 'disabled');
+                return (resp + "\n\n" + "Message decrypted at: " + new Date());
+            });
         }});
+}
+
+function deleteMessage(id){
+    $.ajax({
+        url: '/deleteMessage',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({_id: id}),
+
+        complete: function (req, status) {
+            return;
+        }});
+    pullInbox();
 }
